@@ -1,0 +1,25 @@
+{:auto-load
+ {:zou/constructor zou.framework.core/map->AutoLoader
+  :zou/tags [:tag/core-extension]
+  :prefixes []}
+
+ :logging
+ {:zou/constructor zou.framework.core/map->LoggingConfigurator
+  :zou/tags [:tag/core-extension]
+  :bridge-out? #zou/when-dev true
+  :level #zou/if-prod [:info :debug]
+  :console "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%5p) [%15.15t] %cyan(%-30.30logger{29}) : %m%n"
+  :overrides {"org.quartz.simpl.RAMJobStore" :warn
+              "org.quartz.impl.DirectSchedulerFactory" :warn
+              "org.quartz.core.SchedulerSignalerImpl" :warn
+              "org.xnio" :warn
+              "com.zaxxer.hikari" :info}}
+
+ :extension-loader
+ {:zou/constructor zou.framework.core/map->ExtensionLoader
+  :zou/dependencies {:logging :logging} ; should load after logging setup
+  :zou/tags [:tag/core-extension]}
+
+ :core
+ {:zou/constructor zou.framework.core/map->Core
+  :zou/optionals {:extensions :tag/core-extension}}}

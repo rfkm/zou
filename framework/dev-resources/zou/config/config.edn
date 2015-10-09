@@ -1,0 +1,14 @@
+{$let [base {:counter
+             {:zou/constructor zou.test-component/map->Counter
+              :step            10
+              :zou/tags        [:tag/timer-handler]}
+
+             :timer
+             {:zou/constructor  zou.test-component/map->Timer
+              :zou/dependencies {:handlers :tag/timer-handler}
+              :interval         1000}
+             }]
+ :app {$include #- base}
+ :app2 {$include #- base
+        :counter {:step 100}
+        :timer {:interval 3000}}}

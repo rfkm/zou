@@ -1,0 +1,8 @@
+{$include
+ [#resource "zou/config/default/bootstrap.edn"]
+
+ :auto-load
+ {:prefixes []}
+
+ :logging
+ {:overrides {"zou-todo" :debug}}}

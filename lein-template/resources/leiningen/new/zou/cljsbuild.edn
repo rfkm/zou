@@ -1,0 +1,18 @@
+{:builds
+ {:main
+  {:path "/js/dist/main.js"
+   :source-paths ["src-cljs"]
+   :figwheel true
+   :compiler
+   {:main {{namespace}}.core
+    :asset-path "/js/dist/out"
+    :output-to "resources/public/js/dist/main.js"
+    :output-dir "resources/public/js/dist/out"
+    :source-map-timestamp true
+    :optimizations :none
+    :pretty-print true
+
+    $override
+    #if [#env :prod
+         {:optimizations :advanced
+          :pretty-print false}]}}}}

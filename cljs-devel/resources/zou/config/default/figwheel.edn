@@ -1,0 +1,6 @@
+{:figwheel
+ {:zou/constructor zou.cljs.figwheel/figwheel
+  :zou/optionals {:cljsbuild :cljsbuild}
+  :zou/disabled #zou/when-prod true
+  ;; :enable-server? #zou/if-prod [false true]
+  :css-dirs ["resources/public/css"]}}
