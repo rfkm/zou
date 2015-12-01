@@ -3,6 +3,9 @@
 
 (def env-key :zou-env)
 
+(def hierarchy (-> (make-hierarchy)
+                   (derive :test :dev)))
+
 (defn- normalize-env [x]
   (some-> x name keyword))
 
@@ -11,8 +14,8 @@
   []
   (normalize-env (env/env env-key :prod)))
 
-(defn app-env= [env]
-  (= (app-env) env))
+(defn app-env-isa? [env]
+  (isa? hierarchy (app-env) env))
 
 (defmacro with-env
   "Temporarily redefines env while executing the body via with-redefs.
@@ -26,11 +29,11 @@
      ~@body))
 
 (defmacro when-app-env [env & body]
-  `(when (= (app-env) ~env)
+  `(when (app-env-isa? ~env)
      ~@body))
 
 (defmacro eval-when-app-env [env & body]
-  `(when (= (app-env) ~env)
+  `(when (app-env-isa? ~env)
      (eval (quote (do ~@body)))))
 
 
@@ -40,7 +43,7 @@
 (defmacro ^:private defenv [env-name]
   `(do
      (defn ~(symbol (str "in-" (name env-name) "?")) []
-       (app-env= ~env-name))
+       (app-env-isa? ~env-name))
 
      (defmacro ~(symbol (str "with-" (name env-name) "-env")) [& body#]
        (concat

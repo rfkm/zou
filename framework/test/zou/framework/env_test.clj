@@ -77,11 +77,11 @@
     (sut/with-test-env
       (sut/app-env)) => :test)
 
-  (fact "app-env="
-    (sut/app-env= :dev) => true
+  (fact "app-env-isa?"
+    (sut/app-env-isa? :dev) => true
     (provided (sut/app-env) => :dev)
 
-    (sut/app-env= :prod) => false
+    (sut/app-env-isa? :prod) => false
     (provided (sut/app-env) => :dev))
 
   (fact "when-prod-env"
@@ -123,3 +123,15 @@
     (provided (sut/app-env) => :test)
 
     (sut/eval-when-test-env :test unkown-symbol) => nil))
+
+
+(t/deftest hierarchy-test
+  (fact "app-env-isa?"
+    (with-redefs [env/env {:zou-env :dev}]
+      (sut/app-env-isa? :dev)) => true
+
+    (with-redefs [env/env {:zou-env :test}]
+      (sut/app-env-isa? :dev)) => true
+
+    (with-redefs [env/env {:zou-env :dev}]
+      (sut/app-env-isa? :test)) => false))
