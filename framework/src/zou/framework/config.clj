@@ -1,7 +1,29 @@
 (ns zou.framework.config
   (:require [baum.core :as b]
+            [clojure.java.io :as io]
+            [environ.core :as environ]
             [zou.framework.env :as env]))
 
+(def default-config-path "zou/config/config.edn")
+
+(def config-env-key :zou-config)
+
+(defn- file-or-resource [path]
+  (or
+   (let [f (io/file path)] (when (.exists f) f))
+   (io/resource path)))
+
+(defn fetch-config
+  "Finds a config file."
+  []
+  (file-or-resource (or (:zou-config environ/env)
+                        default-config-path)))
+
+(defn fetch-config-or-abort
+  "Like `fetch-config` but throws an exception when no config file is found."
+  []
+  (or (fetch-config)
+      (throw (RuntimeException. "Found no config file"))))
 
 (b/deflazyreader when-dev-reader [v opts]
   (b/reduction (b/if-reader [(env/in-dev?)

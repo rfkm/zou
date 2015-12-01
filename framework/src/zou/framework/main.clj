@@ -2,13 +2,14 @@
   (:gen-class)
   (:require [cling.core :as cli]
             [clojure.java.io :as io]
+            [zou.framework.config :as conf]
             [zou.framework.core :as core]
             [zou.framework.env :as env]))
 
 (def global-options
   [["-c" "--config PATH" "Config file"
     :parse-fn io/file
-    :default (io/resource "zou/config/config.edn")
+    :default (conf/fetch-config-or-abort)
     :validate [#(.exists ^java.io.File %)  "File does not exist"
                #(.isFile ^java.io.File %)  "Path is not a regular file"
                #(.canRead ^java.io.File %) "File is unreadable"]

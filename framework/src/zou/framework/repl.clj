@@ -1,13 +1,11 @@
 (ns zou.framework.repl
-  (:require [clojure.java.io :as io]
-            [clojure.tools.namespace.repl :as tnr]
+  (:require [clojure.tools.namespace.repl :as tnr]
+            [zou.framework.config :as conf]
             [zou.framework.core :as core]))
-
-(def config-file-path "zou/config/config.edn")
 
 (defn go []
   (core/boot-core!)
-  (core/load-systems (core/core) (io/resource config-file-path))
+  (core/load-systems (core/core) (conf/fetch-config-or-abort))
   (doseq [k (keys (core/systems (core/core)))]
     (core/start-system (core/core) k)))
 
