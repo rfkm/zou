@@ -9,60 +9,63 @@
   (b/read-string {:readers {'sut reader}}
                  s))
 
-(fact "when-dev-reader"
-  (env/with-dev-env
-    (read-with-reader sut/when-dev-reader "#sut :a")) => :a
+(t/deftest when-reader-test
+  (fact "when-dev-reader"
+    (env/with-dev-env
+      (read-with-reader sut/when-dev-reader "#sut :a")) => :a
 
-  (env/with-prod-env
-    (read-with-reader sut/when-dev-reader "#sut :a")) => nil)
+    (env/with-prod-env
+      (read-with-reader sut/when-dev-reader "#sut :a")) => nil)
 
-(fact "when-prod-reader"
-  (env/with-prod-env
-    (read-with-reader sut/when-prod-reader "#sut :a")) => :a
+  (fact "when-prod-reader"
+    (env/with-prod-env
+      (read-with-reader sut/when-prod-reader "#sut :a")) => :a
 
-  (env/with-dev-env
-    (read-with-reader sut/when-prod-reader "#sut :a")) => nil)
+    (env/with-dev-env
+      (read-with-reader sut/when-prod-reader "#sut :a")) => nil)
 
-(fact "when-test-reader"
-  (env/with-test-env
-    (read-with-reader sut/when-test-reader "#sut :a")) => :a
+  (fact "when-test-reader"
+    (env/with-test-env
+      (read-with-reader sut/when-test-reader "#sut :a")) => :a
 
-  (env/with-dev-env
-    (read-with-reader sut/when-prod-reader "#sut :a")) => nil)
+    (env/with-dev-env
+      (read-with-reader sut/when-prod-reader "#sut :a")) => nil))
 
-(fact "if-dev-reader"
-  (env/with-dev-env
-    (read-with-reader sut/if-dev-reader "#sut [:a :b]")) => :a
+(t/deftest if-reader-test
+  (fact "if-dev-reader"
+    (env/with-dev-env
+      (read-with-reader sut/if-dev-reader "#sut [:a :b]")) => :a
 
-  (env/with-prod-env
-    (read-with-reader sut/if-dev-reader "#sut [:a :b]")) => :b)
+    (env/with-prod-env
+      (read-with-reader sut/if-dev-reader "#sut [:a :b]")) => :b)
 
-(fact "if-prod-reader"
-  (env/with-prod-env
-    (read-with-reader sut/if-prod-reader "#sut [:a :b]")) => :a
+  (fact "if-prod-reader"
+    (env/with-prod-env
+      (read-with-reader sut/if-prod-reader "#sut [:a :b]")) => :a
 
-  (env/with-dev-env
-    (read-with-reader sut/if-prod-reader "#sut [:a :b]")) => :b)
+    (env/with-dev-env
+      (read-with-reader sut/if-prod-reader "#sut [:a :b]")) => :b)
 
-(fact "if-test-reader"
-  (env/with-test-env
-    (read-with-reader sut/if-test-reader "#sut [:a :b]")) => :a
+  (fact "if-test-reader"
+    (env/with-test-env
+      (read-with-reader sut/if-test-reader "#sut [:a :b]")) => :a
 
-  (env/with-dev-env
-    (read-with-reader sut/if-prod-reader "#sut [:a :b]")) => :b)
+    (env/with-dev-env
+      (read-with-reader sut/if-prod-reader "#sut [:a :b]")) => :b))
 
-(fact "env-cond"
-  (env/with-dev-env
-    (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => :a)
+(t/deftest cond-reader-test
+  (fact "env-cond"
+    (env/with-dev-env
+      (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => :a)
 
-  (env/with-prod-env
-    (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => :b)
+    (env/with-prod-env
+      (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => :b)
 
-  (env/with-test-env
-    (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => :c)
+    (env/with-test-env
+      (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => :c)
 
-  (env/with-app-env :foo
-    (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => nil)
+    (env/with-app-env :foo
+      (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => nil)
 
-  (env/with-app-env :foo
-    (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c :else :d}") => :d))
+    (env/with-app-env :foo
+      (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c :else :d}") => :d)))
