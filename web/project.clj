@@ -8,6 +8,7 @@
                  [metosin/ring-http-response "0.6.5"]
                  [ring-logger "0.7.5"]
                  [ring.middleware.conditional "0.2.0"]
+                 [ring-webjars "0.1.1"]
                  [bidi "1.22.1"]
                  [prone "0.8.2"]
                  [hawk "0.2.5"]]

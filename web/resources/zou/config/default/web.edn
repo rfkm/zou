@@ -101,7 +101,8 @@
                                       :stacktrace-log :before}
                    :routing-middleware {:response-exception-handler :after}
                    :pseudo-method {:ring-defaults :after
-                                   :routing-middleware :before}}}
+                                   :routing-middleware :before}
+                   :webjars {:routing-middleware :before}}}
 
  :routed-middlewares
  {:zou/constructor zou.web.middleware.aggregator/map->MiddlewareAggregator
@@ -177,6 +178,11 @@
  {:zou/constructor zou.web.middleware/reload
   :zou/disabled #zou/when-prod true
   :zou/tags [:tag/middleware]}
+
+ :webjars
+ {:zou/constructor zou.web.middleware/webjars
+  :zou/tags [:tag/middleware]
+  :prefix "assets"}
 
  :container
  {:zou/constructor zou.web.middleware.container/map->Container

@@ -3,6 +3,7 @@
   (:require [prone.middleware :as prone]
             [ring.middleware.defaults :as defaults]
             [ring.middleware.stacktrace :as stacktrace]
+            [ring.middleware.webjars :as webjars]
             [zou.web.middleware.exception :as ex]
             [zou.web.middleware.out :as out]
             [zou.web.middleware.proto :as proto]
@@ -26,3 +27,6 @@
 (def error-handler ex/map->ErrorHandler)
 (def reload (partial simple-middleware reload/wrap-reload))
 (def pseudo-method (partial simple-middleware pmethod/wrap-pseudo-method))
+(def webjars (partial simple-middleware
+                      (fn [h & [conf]]
+                        (webjars/wrap-webjars h (or (:prefix conf) "/assets")))))
