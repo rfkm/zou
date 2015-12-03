@@ -15,7 +15,7 @@
   c/Lifecycle
   (start [this]
     (let [finder (fn [route-id]
-                   (let [h (fproto/find handler-finder route-id)]
+                   (when-let [h (fproto/find handler-finder route-id)]
                      (if (satisfies? mproto/RingMiddleware middlewares)
                        (mproto/wrap middlewares h)
                        h)))]
