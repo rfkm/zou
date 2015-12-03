@@ -94,7 +94,7 @@
                (dep/graph)
                deps-map)))
 
-(defn- extract-subsystem-conf [conf ks]
+(defn extract-subsystem-conf [conf ks]
   (let [conf (preprocess-conf conf)
         graph (dependency-graph conf)]
     (select-keys conf (into ks (mapcat #(dependency-keys graph %) ks)))))
