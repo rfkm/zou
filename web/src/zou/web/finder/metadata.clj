@@ -4,8 +4,10 @@
             [zou.util.namespace :as un]
             [zou.web.finder.proto :as proto]))
 
-(defn- collect-vars [tag-name]
-  (un/find-tagged-vars tag-name))
+(defn- collect-vars [tag-name ns-prefix]
+  (if ns-prefix
+    (un/find-tagged-vars tag-name #(.startsWith (name (ns-name %)) ns-prefix))
+    (un/find-tagged-vars tag-name)))
 
 (defn- collect-conflicted-tags [pairs]
   (->> (group-by first pairs)
@@ -23,12 +25,12 @@
        warn-conflicted!
        (into {})))
 
-(defrecord MetadataBasedFinder [dynamic? tag-name]
+(defrecord MetadataBasedFinder [dynamic? tag-name ns-prefix]
   c/Lifecycle
   (start [this]
     (let [tag-name (or tag-name ::tag)]
       (assoc this
-             :dic (build-dic (collect-vars tag-name) tag-name)
+             :dic (build-dic (collect-vars tag-name ns-prefix) tag-name)
              :tag-name tag-name)))
   (stop [this] this)
 
@@ -36,7 +38,7 @@
   (find [this target-key]
     (cond
       (keyword? target-key) (get (if dynamic?
-                                   (build-dic (collect-vars tag-name) tag-name)
+                                   (build-dic (collect-vars tag-name ns-prefix) tag-name)
                                    (:dic this))
                                  target-key)
       (fn? target-key)      target-key)))

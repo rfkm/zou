@@ -110,5 +110,6 @@
                           (def ^:bar bar)))
         (ne/eval-ns ns2 '((def ^:private ^:foo foo)))
         (sut/find-tagged-vars :foo) => (just [(ns-resolve ns1 'foo) (ns-resolve ns2 'foo)] :in-any-order)
+        (sut/find-tagged-vars :foo #(= (ns-name %) ns1)) => (just [(ns-resolve ns1 'foo)])
         (finally (remove-ns ns1)
                  (remove-ns ns2))))))

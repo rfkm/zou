@@ -51,10 +51,14 @@
        (filter #(some (partial tagged-ns? %) meta-keys))
        (map ns-name)))
 
-(defn find-tagged-vars [meta-key]
-  (->> (all-ns)
-       (mapcat #(vals (ns-interns %)))
-       (filter #(get (meta %) meta-key))))
+(defn find-tagged-vars
+  ([meta-key]
+   (find-tagged-vars meta-key identity))
+  ([meta-key ns-filter]
+   (->> (all-ns)
+        (filter ns-filter)
+        (mapcat #(vals (ns-interns %)))
+        (filter #(get (meta %) meta-key)))))
 
 (defn- import-ns*
   ([ns]
