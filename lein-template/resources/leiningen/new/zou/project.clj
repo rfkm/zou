@@ -3,7 +3,8 @@
 (defproject {{raw-name}} "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :min-lein-version "2.5.2"{{#cljs?}}
-  :clean-targets ^{:protect false} [:target-path "resources/public/js/dist" "out"]{{/cljs?}}
+  :clean-targets ^{:protect false} [:target-path "resources/public/js/dist" "out"]
+  :source-paths ["src" "src-cljs"]{{/cljs?}}
   :repositories [["zou-repo"
                   {:url "https://s3.amazonaws.com/zou-repo"}]]
   :uberjar-name "{{uberjar-name}}"
