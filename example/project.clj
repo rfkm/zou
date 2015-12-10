@@ -25,7 +25,6 @@
                        :aot :all
                        :hooks [leiningen.cljsbuild]}
              :dev {:env {:zou-env :dev}
-                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
                    :dependencies [[zou/devel ~zou-version]
                                   [midje "1.8.2"]
                                   [com.cemerick/piggieback "0.2.1"]]
