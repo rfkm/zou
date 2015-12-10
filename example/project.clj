@@ -9,6 +9,7 @@
   :uberjar-name "zou-todo.jar"
   :repl-options {:init-ns zou.framework.repl
                  :init (zou.framework.core/boot-core!)}
+  :source-paths ["src" "src-cljs"]
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [zou ~zou-version]
                  [com.h2database/h2 "1.4.190"]
