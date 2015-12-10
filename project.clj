@@ -14,6 +14,10 @@
                                        [org.clojure/tools.cli "0.3.3"]
                                        [lein-shell "0.4.2"]]
                         :dependencies [[cheshire "5.5.0"]]}
+             :deploy {:deploy-repositories [["zou-repo" {:url        "s3p://zou-repo/"
+                                                         :username   :env/aws_access_key_id
+                                                         :passphrase :env/aws_secret_access_key}]]
+                      :plugins [[s3-wagon-private "1.2.0"]]}
              :dev {:dependencies [[midje "1.8.2"]
                                   [org.clojure/clojure "1.7.0"]
                                   [clj-http "2.0.0"]
@@ -47,11 +51,7 @@
              :description         "Component-based framework"
              :repositories        [["zou-repo"
                                     {:url "https://s3.amazonaws.com/zou-repo"}]]
-             :deploy-repositories [["zou-repo" {:url        "s3p://zou-repo/"
-                                                :username   :env/aws_access_key_id
-                                                :passphrase :env/aws_secret_access_key}]]
              :license             {:name "Eclipse Public License"
                                    :url "http://www.eclipse.org/legal/epl-v10.html"}
              :scm                 {:dir ".."}
-             :plugins             [[lein-environ "1.0.1"]
-                                   [s3-wagon-private "1.2.0"]]}})
+             :plugins             [[lein-environ "1.0.1"]]}})
