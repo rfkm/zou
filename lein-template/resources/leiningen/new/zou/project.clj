@@ -24,11 +24,11 @@
             [lein-cljsbuild "1.1.1"]{{/cljs?}}]{{#cljs?}}
   :cljsbuild {import "resources/zou/config/cljsbuild.edn"}{{/cljs?}}
   :profiles {:uberjar {:env {:prod true}
-                       :aot :all{{#cljs?}}
+                       :aot [zou.framework.main #".*"]{{#cljs?}}
                        :hooks [leiningen.cljsbuild]{{/cljs?}}}
              :dev {:env {:zou-env :dev}
                    :dependencies [[zou/devel ~zou-version{{^cljs?}} :exclusions [zou/cljs-devel]{{/cljs?}}]{{#midje?}}
                                   [midje "1.8.2"]{{/midje?}}{{#cljs?}}
                                   [com.cemerick/piggieback "0.2.1"]{{/cljs?}}]
                    :plugins [{{#midje?}}[lein-midje "3.2"]{{/midje?}}]}}
-  :main {{namespace}}.main)
+  :main zou.framework.main)
