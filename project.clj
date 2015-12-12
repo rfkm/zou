@@ -15,8 +15,10 @@
                         :test-paths ~(subdir "test")
                         :resource-paths ~(into (subdir "dev-resources")
                                                (subdir "resources"))
-                        :plugins      [[lein-cloverage "1.0.7-SNAPSHOT"]]
+                        :plugins      [[lein-cloverage "1.0.7-SNAPSHOT"]
+                                       [lein-exec "0.3.5"]]
                         :dependencies [[zou/devel :version]
+                                       [cheshire "5.5.0"]
                                        [org.clojure/tools.cli "0.3.3"]
                                        [cloverage "1.0.7-SNAPSHOT" :exclusions [org.clojure/tools.cli]]]}
              :deploy {:deploy-repositories [["zou-repo" {:url        "s3p://zou-repo/"
@@ -37,7 +39,9 @@
                                   [selmer "0.9.5"]]
                    :plugins      [[lein-midje "3.2"]]
                    :env          {:zou-env :dev}
-                   :aliases      {"coverage" ["with-profile" "+coverage" "cloverage" "--codecov"]}}}
+                   :aliases      {"coverage" ["with-profile" "+coverage" "do"
+                                              ["cloverage" "--codecov"]
+                                              ["exec" "-p" "etc/codecov.clj"]]}}}
   :modules {:dirs ~modules
             :subprocess nil
             :inherited
