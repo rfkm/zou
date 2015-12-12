@@ -13,7 +13,7 @@ test:
   override:
     - lein coverage
   post:
-    - lein coveralls
+    - bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
 deployment:
   snapshot:
     branch: master
