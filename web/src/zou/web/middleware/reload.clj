@@ -45,6 +45,5 @@
   (-> handler
       (dep/wrap-reload options)
       ;; (wrap-reload-tagged-var)
-      (wrap-reload-enlive)
-      (wrap-reload-tagged-ns)
-      ))
+      ;; (wrap-reload-enlive)
+      (wrap-reload-tagged-ns)))
