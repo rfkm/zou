@@ -74,4 +74,4 @@
                             'zou/if-dev if-dev-reader
                             'zou/if-prod if-prod-reader
                             'zou/if-test if-test-reader
-                            :zou/cond env-cond-reader}}))
+                            'zou/cond env-cond-reader}}))
