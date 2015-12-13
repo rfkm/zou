@@ -18,11 +18,11 @@
        (flush []
          (let [^java.io.ByteArrayOutputStream this this]
            (proxy-super flush)
-           (let [message (.trim (.toString this))]
+           (let [message (.toString this)]
              (proxy-super reset)
              (when (pos? (.length message))
                (with-bindings (attach-id bindings)
-                 (println message)))))))
+                 (print message)))))))
      true)))
 
 (defn bridge-out! []

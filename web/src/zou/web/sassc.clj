@@ -48,7 +48,7 @@
     (let [ret (apply sh/sh (cons (or (:sassc-cmd conf) "sassc") (gen-args conf)))]
       (if (= (:exit ret) 0)
         (log/infof "Successfully compiled %s to %s" (:src conf) (:output-to conf))
-        (log/error "Failed to compile:" ))
+        (log/error "Failed to compile"))
       (when (seq (:err ret)) (log/errorn (:err ret)))
       (when (seq (:out ret)) (log/infon (:out ret))))
     (catch java.io.IOException e
