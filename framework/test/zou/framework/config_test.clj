@@ -68,4 +68,8 @@
       (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c}") => nil)
 
     (env/with-app-env :foo
-      (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c :else :d}") => :d)))
+      (read-with-reader sut/env-cond-reader "#sut {:dev :a :prod :b :test :c :else :d}") => :d))
+
+  (fact "else position can be anywhere (core.match doesn't allow it)"
+    (env/with-test-env
+      (read-with-reader sut/env-cond-reader "#sut {:else :a :test :c}") => :c)))

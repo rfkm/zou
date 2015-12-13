@@ -59,11 +59,9 @@
                opts))
 
 (b/deflazyreader env-cond-reader [clauses opts]
-  (let [clauses (if-not (contains? clauses :else)
-                  (assoc clauses :else nil)
-                  clauses)]
-    (b/reduction (b/match-reader (into [(env/app-env)] (apply concat clauses)))
-                 opts)))
+  (b/reduction (b/match-reader (into [(env/app-env)] (concat (apply concat (dissoc clauses :else))
+                                                             [:else (:else clauses)])))
+               opts))
 
 (defn read-config [file]
   (b/read-config file
