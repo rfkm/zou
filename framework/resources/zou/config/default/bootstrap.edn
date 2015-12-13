@@ -6,7 +6,8 @@
  :logging
  {:zou/constructor zou.framework.core/map->LoggingConfigurator
   :zou/tags [:tag/core-extension]
-  :bridge-out? #zou/when-dev true
+  :bridge-out? #zou/cond {:dev true
+                          :else false}
   :level #zou/if-prod [:info :debug]
   :console "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%5p) [%15.15t] %cyan(%-30.30logger{29}) : %m%n"
   :overrides {"org.quartz.simpl.RAMJobStore" :warn
