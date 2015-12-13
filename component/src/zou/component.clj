@@ -34,7 +34,7 @@
 (defn- translate-tags [conf]
   (u/map-vals
    #(if (map? %) (dissoc % :zou/tags) %)
-   (u/merge-nested
+   (u/deep-merge
     conf
     (u/map-vals (partial hash-map :zou/dependencies)
                 (system-tags conf)))))
