@@ -88,3 +88,29 @@
        ~@(for [s (keys (ns-publics ns))
                :when (not (contains? (set exclusions) s))]
            `(inject ~to-ns ~s)))))
+
+(defmacro with-temp-ns
+  {:arglists '([[sym ns-name? forms & more] & body])}
+  [bindings & body]
+  (let [parse-bindings
+        (fn parse-bindings [[sym ns-name forms & more :as bindings]]
+          (when-not (symbol? sym)
+            (throw (ex-info "Unsupported binding form" {:rest bindings})))
+          (if (string? ns-name)
+            (into [sym (symbol ns-name) forms] (when more (parse-bindings more)))
+            (into [sym (gensym "temp-ns") ns-name] (when more
+                                                     (parse-bindings (cons forms more))))))
+        ms (mapcat (fn [[sym ns-name forms]]
+                     [sym
+                      `(let [ns-name# (~'quote ~ns-name)]
+                         (do (create-ns ns-name#)
+                             (ne/eval-ns ns-name# (~'quote ((clojure.core/refer-clojure))))
+                             (ne/eval-ns ns-name# ~forms)
+                             (the-ns ns-name#)))])
+                   (partition 3 (parse-bindings bindings)))]
+    `(let [~@ms]
+       (try
+         ~@body
+         (finally
+           ~@(for [ns (take-nth 2 ms)]
+               `(remove-ns (ns-name ~ns))))))))
