@@ -21,9 +21,11 @@
     (resolve-var sym)
     (catch Throwable _)))
 
-(defn require-all [& prefixes]
+(defn require-all [classpath & prefixes]
   (doseq [prefix prefixes
-          ns (b/namespaces-on-classpath :prefix prefix)]
+          ns (if classpath
+               (b/namespaces-on-classpath :prefix prefix :classpath classpath)
+               (b/namespaces-on-classpath :prefix prefix))]
     (log/debug "Loading:" ns)
     (require ns)))
 

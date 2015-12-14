@@ -1,5 +1,6 @@
 (ns zou.util.namespace-test
-  (:require [clojure.test :as t]
+  (:require [bultitude.core :as b]
+            [clojure.test :as t]
             [midje.sweet :refer :all]
             [zou.util.namespace :as sut]))
 
@@ -49,9 +50,18 @@
 
 (t/deftest require-test
   (fact "require-all"
-    (sut/require-all "zou.util") => nil
+    (sut/require-all nil "foo") => nil
     (provided
-      (require (as-checker #(.startsWith (name %) "zou.util"))) => nil)))
+      (b/namespaces-on-classpath :prefix "foo") => (list 'foo.bar 'foo.baz)
+      (require 'foo.bar) => nil
+      (require 'foo.baz) => nil))
+
+  (fact "require-all w/ classpath"
+    (sut/require-all "test" "zou.util") => nil
+    (provided
+      (b/namespaces-on-classpath :prefix "zou.util" :classpath "test") => (list 'foo.bar 'foo.baz)
+      (require 'foo.bar) => nil
+      (require 'foo.baz) => nil)))
 
 (t/deftest contains-tagged-var-test
   (facts "contains-tagged-var?"

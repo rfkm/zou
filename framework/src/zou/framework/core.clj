@@ -99,11 +99,11 @@
 ;;; Built-in core modules
 ;;; ---------------------
 
-(defrecord AutoLoader [prefixes]
+(defrecord AutoLoader [classpath prefixes]
   c/Lifecycle
   (start [this]
     (when (seq prefixes)
-      (apply ns/require-all prefixes))
+      (apply ns/require-all classpath prefixes))
     this)
   (stop [this]
     this))

@@ -1,7 +1,8 @@
 {:auto-load
  {:zou/constructor zou.framework.core/map->AutoLoader
   :zou/tags [:tag/core-extension]
-  :prefixes []}
+  :prefixes []
+  :classpath "src"}
 
  :logging
  {:zou/constructor zou.framework.core/map->LoggingConfigurator
