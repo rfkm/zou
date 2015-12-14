@@ -5,9 +5,22 @@
 (defn routed? [req]
   (contains? req :zou/routing))
 
+(defn- remove-trailing-slash [s]
+  (if (and (string? s)
+           (not= s "/")
+           (.endsWith ^String s "/"))
+    (apply str (butlast s))
+    s))
+
+(defn- normalize-path-info [req]
+  (-> req
+      (update-in [:uri] remove-trailing-slash)
+      (update-in [:path-info] remove-trailing-slash)))
+
 (defn routed-request [router req]
   {:pre [(satisfies? proto/Router router)]}
-  (let [req (if-let [matched (proto/match router req)]
+  (let [req (normalize-path-info req)
+        req (if-let [matched (proto/match router req)]
               (assoc req
                      :zou/routing matched
                      :route-params (:route-params matched))

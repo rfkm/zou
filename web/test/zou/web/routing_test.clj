@@ -11,6 +11,11 @@
     (sut/routed? {:zou/routing {}}) => true
     (sut/routed? {}) => false)
 
+  (fact "normalize-path-info"
+    (req/path-info (#'sut/normalize-path-info (mock/request :get "/"))) => "/"
+    (req/path-info (#'sut/normalize-path-info (mock/request :get "/a"))) => "/a"
+    (req/path-info (#'sut/normalize-path-info (mock/request :get "/a/"))) => "/a")
+
   (facts "routed-request"
     (let [matched {:route-params {:post-id "123"}
                    :route-id :my-route
