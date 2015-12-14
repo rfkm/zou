@@ -1,5 +1,6 @@
 (ns zou.web.routing
-  (:require [zou.web.middleware.proto :as mproto]
+  (:require [zou.util :as u]
+            [zou.web.middleware.proto :as mproto]
             [zou.web.routing.proto :as proto]))
 
 (defn routed? [req]
@@ -14,8 +15,8 @@
 
 (defn- normalize-path-info [req]
   (-> req
-      (update-in [:uri] remove-trailing-slash)
-      (update-in [:path-info] remove-trailing-slash)))
+      (u/?> (:uri req) (update-in [:uri] remove-trailing-slash))
+      (u/?> (:path-info req) (update-in [:path-info] remove-trailing-slash))))
 
 (defn routed-request [router req]
   {:pre [(satisfies? proto/Router router)]}
