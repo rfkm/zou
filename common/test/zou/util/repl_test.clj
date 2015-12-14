@@ -6,23 +6,17 @@
 
 (t/deftest out-bridge-test
   (fact "out"
-    (let [r (repeat 10000 "あ")
-          expect (str/join r)]
-      (try
-        (with-out-str
-          (sut/bridge-out!)
-          (doseq [c r]
-            (.print System/out c))) => expect
-        (finally
-          (sut/restore-out!)))))
+    (try
+      (with-out-str
+        (sut/bridge-out!)
+        (.print System/out "foo")) => "foo\n"
+      (finally
+        (sut/restore-out!))))
 
   (fact "err"
-    (let [r (repeat 10000 "あ")
-          expect (str/join r)]
-      (try
-        (with-out-str
-          (binding [*err* *out*] (sut/bridge-out!))
-          (doseq [c r]
-            (.print System/err c))) => expect
-        (finally
-          (sut/restore-out!))))))
+    (try
+      (with-out-str
+        (binding [*err* *out*] (sut/bridge-out!))
+        (.print System/err "foo")) => "foo\n"
+      (finally
+        (sut/restore-out!)))))
