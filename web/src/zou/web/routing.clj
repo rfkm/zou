@@ -7,11 +7,12 @@
 
 (defn routed-request [router req]
   {:pre [(satisfies? proto/Router router)]}
-  (if-let [matched (proto/match router req)]
-    (assoc req
-           :zou/routing (assoc matched
-                               :router router)
-           :route-params (:route-params matched))
+  (let [req (if-let [matched (proto/match router req)]
+              (assoc req
+                     :zou/routing matched
+                     :route-params (:route-params matched))
+              req)
+        req (assoc-in req [:zou/routing :router] router)]
     req))
 
 (defn routed-info [req]
