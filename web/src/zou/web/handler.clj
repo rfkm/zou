@@ -1,5 +1,6 @@
 (ns zou.web.handler
-  (:require [zou.util :as u]
+  (:require [clojure.string :as str]
+            [zou.util :as u]
             [zou.web.handler.args-mapper :as mapper]
             [zou.web.middleware.proto :as proto]))
 
@@ -54,6 +55,13 @@
     (assoc m
            :fn
            #(get-in % [:zou/container k]))))
+
+(defmethod mapper/process-param "|" [{:keys [sym] :as m}]
+  (let [ks (mapv keyword (str/split (subs (name sym) 1) #"\|"))]
+    (assoc m
+           :alias (symbol (name (last ks)))
+           :fn
+           #(get-in % ks))))
 
 (defmethod mapper/process-param nil [{:keys [sym] :as m}]
   (let [k (keyword (name sym))]
