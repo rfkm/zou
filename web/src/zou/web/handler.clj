@@ -64,11 +64,12 @@
            #(get-in % ks))))
 
 (defmethod mapper/process-param nil [{:keys [sym] :as m}]
-  (let [k (keyword (name sym))]
+  (let [ks (map keyword (str/split (name sym) #"\|"))]
     (assoc m
+           :alias (symbol (name (last ks)))
            :fn
-           #(get-in % [:route-params k]
-                    (get-in % [:params k])))))
+           #(get-in % (into [:route-params] ks)
+                    (get-in % (into [:params] ks))))))
 
 
 ;;; middleware

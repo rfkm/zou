@@ -5,15 +5,14 @@
             [zou.web.handler :as sut]))
 
 (def req (assoc (mock/request :get "/")
-                :params {:a :aa}
+                :params {:a :aa :b {:c :d}}
                 :zou/container {:view :view'}))
 
 (t/deftest args-mapper-impl-test
   (fact
-    (sut/defhandler a [a $view $req $request]
-      [a $view $req $request])
-
-    (sut/invoke-with-mapper a req) => [:aa :view' req req])
+    (sut/defhandler a [a b|c |params|b $view $req $request]
+      [a c b $view $req $request])
+    (sut/invoke-with-mapper a req) => [:aa :d {:c :d} :view' req req])
   (fact
     (sut/defhandler b
       "doc"
