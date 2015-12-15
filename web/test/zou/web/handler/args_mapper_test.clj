@@ -10,6 +10,11 @@
              (let [k (keyword (subs (name (:sym m)) 5))]
                (assoc m :fn #(get-in % [:test k]))))
 
+           (defmethod sut/process-param "alias:" [m]
+             (let [k (keyword (subs (name (:sym m)) 6))]
+               (assoc m
+                      :alias (symbol (name k))
+                      :fn #(get-in % [:test k]))))
            (defmethod sut/process-param "?foo" [m]
              (if (= (:sym m) '?foo)
                (assoc m :fn (constantly :foo))
@@ -20,6 +25,7 @@
  (after :facts
         (do
           (remove-method sut/process-param "test:")
+          (remove-method sut/process-param "alias:")
           (remove-method sut/process-param "?foo")
           (remove-method sut/process-param "?"))))
 
@@ -52,14 +58,14 @@
 
 (t/deftest gen-destructuring-spec-test
   (fact
-    (let [ret (sut/gen-destructuring-spec '[test:a test:b :as b' test:c :as c test:d :<< as-long])]
-      ret => (just {:params '[test:a b' c test:d] :fn fn?})
+    (let [ret (sut/gen-destructuring-spec '[test:a test:b :as b' test:c :as c test:d :<< as-long alias:a])]
+      ret => (just {:params '[test:a b' c test:d a] :fn fn?})
       ((:fn ret) {:test {:a ..a..
                          :b ..b..
                          :c ..c..
                          :d "100"}})
       =>
-      [..a.. ..b.. ..c.. 100]))
+      [..a.. ..b.. ..c.. 100 ..a..]))
 
   (fact
     (let [ret (sut/gen-destructuring-spec [])]

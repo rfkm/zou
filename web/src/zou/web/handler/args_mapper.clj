@@ -48,7 +48,7 @@
       acc)))
 
 (defn- merge-spec-map [m m']
-  (assoc m'
+  (assoc (merge m m')
          :fn (comp (:fn m' identity) (:fn m identity))))
 
 (defn- process-infixes [m]
@@ -63,9 +63,11 @@
               :infix-operand))))
 
 (defn- gen-sym-fn [[sym infix infix-operand :as p]]
-  (let [m (process-infixes {:infix-operand infix-operand
-                            :sym sym
-                            :infix infix})]
+  (let [m (if (= (count p) 1)           ; no infix
+            {:sym sym}
+            (process-infixes {:infix-operand infix-operand
+                              :sym sym
+                              :infix infix}))]
     (merge-spec-map (process-param m) m)))
 
 (defn gen-destructuring-spec [params]
@@ -73,7 +75,7 @@
                   (gen-sym-fn
                    (if (vector? p)
                      p
-                     [p :as p])))
+                     [p])))
                 (group-params params))]
     {:params (mapv #(:alias % (:sym %)) ms)
      :fn (if (seq ms) (apply juxt (map :fn ms)) (constantly []))}))
