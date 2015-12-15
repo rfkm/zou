@@ -68,7 +68,6 @@
                    {"project.clj"                        "project.clj"
                     "resources/zou/config/config.edn"    "config.edn"
                     "resources/zou/config/bootstrap.edn" "bootstrap.edn"
-                    "src/{{dirs}}/main.clj"              "main.clj"
                     "src/zou/ext/repl/{{dirs}}.clj"      "ext_repl.clj"
                     "src/{{dirs}}/routes.clj"            "routes.clj"
                     "src/{{dirs}}/handler/main.clj"      "handler_main.clj"
