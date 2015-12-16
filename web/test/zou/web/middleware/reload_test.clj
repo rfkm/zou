@@ -8,13 +8,21 @@
             [zou.web.middleware.reload :as sut]))
 
 (facts "wrap-reload-ns"
-  (log/with-test-logger
-    (let [h (sut/wrap-reload-ns identity {:ns-finder-fn (constantly [*ns*])})
-          ns-name (ns-name *ns*)]
-      (h ..req..) => ..req..
-      (provided
-        (require ns-name :reload) => anything)
-      (log/logged? "Reloading: zou.web.middleware.reload-test") => true)))
+  (fact
+    (log/with-test-logger
+      (let [h (sut/wrap-reload-ns identity {:ns-finder-fn (constantly [*ns*])})
+            ns-name (ns-name *ns*)]
+        (h ..req..) => ..req..
+        (provided
+          (require ns-name :reload) => anything)
+        (log/logged? "Reloading: zou.web.middleware.reload-test") => true)))
+
+  (fact "Ignore errors when loading namespaces which have no files"
+    (log/with-test-logger
+      (let [tmp-ns (create-ns 'tmp)
+            h (sut/wrap-reload-ns identity {:ns-finder-fn (constantly [tmp-ns])})
+            ns-name 'tmp]
+        (h ..req..) => ..req..))))
 
 (t/deftest wrap-reload-enlive-test
   (facts "wrap-reload-enlive"

@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [ring.middleware.reload :as dep]
             [zou.logging :as log]
-            [zou.util.namespace :as un]))
+            [zou.util.namespace :as un])
+  (:import java.io.FileNotFoundException))
 
 (def reload-tag :zou/reload)
 
@@ -11,7 +12,9 @@
   (fn [req]
     (doseq [ns (ns-finder-fn)]
       (log/debug "Reloading:" (ns-name ns))
-      (require (ns-name ns) :reload))
+      (try
+        (require (ns-name ns) :reload)
+        (catch FileNotFoundException _)))
     (handler req)))
 
 (defn wrap-reload-tagged-var [handler]
