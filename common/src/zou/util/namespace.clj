@@ -80,7 +80,8 @@
 (defmacro inject [to-ns var-sym]
   (let [from-ns (ns-name *ns*)]
     `(do
-       (require (quote ~to-ns))
+       (try (require (quote ~to-ns))
+            (catch java.io.FileNotFoundException _#))
        (ne/with-ns (quote ~to-ns)
          (import-vars [~from-ns ~var-sym])))))
 

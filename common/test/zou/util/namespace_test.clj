@@ -1,6 +1,7 @@
 (ns zou.util.namespace-test
   (:require [bultitude.core :as b]
             [clojure.test :as t]
+            [hara.namespace.eval :as ne]
             [midje.sweet :refer :all]
             [zou.util.namespace :as sut]))
 
@@ -121,3 +122,18 @@
       (try
         (sut/find-tagged-vars :foo) => (just [(ns-resolve (ns-name ns1) 'foo) (ns-resolve (ns-name ns2) 'foo)] :in-any-order)
         (sut/find-tagged-vars :foo #(= % ns1)) => (just [(ns-resolve (ns-name ns1) 'foo)])))))
+
+(facts "inject"
+  (sut/with-temp-ns [ns1 "to-ns" '()
+                     ns2 "from-ns" '((def foo :foo))]
+    (ne/with-ns ns2
+      (zou.util.namespace/inject to-ns foo))
+    @(ns-resolve ns1 'foo) => @(ns-resolve ns2 'foo)))
+
+(facts "inject-ns"
+  (sut/with-temp-ns [ns1 "to-ns" '()
+                     ns2 "from-ns" '((def foo :foo)
+                                     (def bar :bar))]
+    (ne/with-ns ns2
+      (zou.util.namespace/inject-ns to-ns [foo]))
+    (keys (ns-publics ns1)) => ['bar]))

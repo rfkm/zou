@@ -5,7 +5,7 @@
   ([to-ns]
    (inject-ns* to-ns []))
   ([to-ns exclusions]
-   `(un/inject-ns ~to-ns [init deinit])))
+   `(un/inject-ns ~to-ns [~'init ~'deinit])))
 
 (defmacro inject-ns
   {:arglists '([to-ns] [to-ns exclusions])}
