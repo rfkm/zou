@@ -10,9 +10,9 @@
 
 (t/deftest args-mapper-impl-test
   (fact
-    (sut/defhandler a [a b|c |params|b $view $req $request]
-      [a c b $view $req $request])
-    (sut/invoke-with-mapper a req) => [:aa :d {:c :d} :view' req req])
+    (sut/defhandler a [a b|c |params|b $view $req $request |params :as {aa :a}]
+      [a c b $view $req $request aa])
+    (sut/invoke-with-mapper a req) => [:aa :d {:c :d} :view' req req :aa])
   (fact
     (sut/defhandler b
       "doc"

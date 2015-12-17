@@ -86,6 +86,5 @@
     (sut/gen-destructuring-spec '[:as a]) => (throws "Invalid format of parameters")
     (sut/gen-destructuring-spec '[a :as]) => (throws "Invalid format of parameters")
     (sut/gen-destructuring-spec '[a :<<]) => (throws "Invalid format of parameters")
-    (sut/gen-destructuring-spec '[a :as :as]) => (throws #"An alias must be a symbol")
     (sut/gen-destructuring-spec '[a :foo a]) => (throws "Unknown infix operator: :foo")
     (sut/gen-destructuring-spec '[a :<< foo]) => (throws "Unknown coercer: foo")))

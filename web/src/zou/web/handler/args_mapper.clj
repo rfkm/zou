@@ -84,7 +84,6 @@
 ;; impls
 
 (defmethod process-infix :as [m]
-  (assert (symbol? (:infix-operand m)) "An alias must be a symbol")
   (assoc m
          :alias
          (:infix-operand m)))
