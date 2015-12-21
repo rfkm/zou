@@ -19,10 +19,11 @@
 
  :handler-finder
  {:zou/constructor zou.web.finder.rule/map->RuleBasedFinder
-  :mappings {}
+  :mappings        {}
   ;; :zou/constructor zou.web.finder.metadata/map->MetadataBasedFinder
   ;; :dynamic?        true
-  ;; :var-tag        :zou/handler
+  ;; :var-tag         :zou/handler
+  ;; :ns-tag          :zou/handler-ns
   }
 
  :routes

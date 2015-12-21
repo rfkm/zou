@@ -5,11 +5,17 @@
             [zou.web.middleware.proto :as proto]))
 
 (defmacro defhandler
-  {:arglists '([name doc-string? attr-map? [params*] prepost-map? body])}
+  {:arglists '([name handler-name? doc-string? attr-map? [params*] prepost-map? body])}
   [name & fdecl]
-  (let [m (if (string? (first fdecl))
-            {:doc (first fdecl)}
+  (let [m (if (keyword? (first fdecl))
+            {:zou/handler (first fdecl)}
             {})
+        fdecl (if (keyword? (first fdecl))
+                (next fdecl)
+                fdecl)
+        m (if (string? (first fdecl))
+            (assoc m :doc (first fdecl))
+            m)
         fdecl (if (string? (first fdecl))
                 (next fdecl)
                 fdecl)
@@ -26,6 +32,7 @@
         m (assoc m :arglists (list 'quote (list (:params spec))))
         m (conj (if (meta name) (meta name) {}) m)]
     `(let [mapper# (:fn (mapper/gen-destructuring-spec (quote ~params)))]
+       (alter-meta! *ns* assoc :zou/handler-ns true)
        (def ~(with-meta name m)
          (vary-meta
           (fn ~(:params spec) ~@fdecl)
