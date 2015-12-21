@@ -22,7 +22,7 @@
   :mappings {}
   ;; :zou/constructor zou.web.finder.metadata/map->MetadataBasedFinder
   ;; :dynamic?        true
-  ;; :tag-name        :zou/handler
+  ;; :var-tag        :zou/handler
   }
 
  :routes

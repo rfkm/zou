@@ -4,10 +4,10 @@
             [zou.util.namespace :as un]
             [zou.web.finder.proto :as proto]))
 
-(defn- collect-vars [tag-name ns-prefix]
-  (if ns-prefix
-    (un/find-tagged-vars tag-name #(.startsWith (name (ns-name %)) ns-prefix))
-    (un/find-tagged-vars tag-name)))
+(defn- collect-vars [var-tag ns-tag]
+  (if ns-tag
+    (un/find-tagged-vars var-tag #(contains? (meta (the-ns %)) ns-tag))
+    (un/find-tagged-vars var-tag)))
 
 (defn- collect-conflicted-tags [pairs]
   (->> (group-by first pairs)
@@ -19,26 +19,26 @@
     (log/warn "Conflicted tags:" tag (vec vars)))
   pairs)
 
-(defn- build-dic [vars tag-name]
+(defn- build-dic [vars var-tag]
   (->> vars
-       (map #(vector (get (meta %) tag-name) (deref %)))
+       (map #(vector (get (meta %) var-tag) (deref %)))
        warn-conflicted!
        (into {})))
 
-(defrecord MetadataBasedFinder [dynamic? tag-name ns-prefix]
+(defrecord MetadataBasedFinder [dynamic? var-tag ns-tag]
   c/Lifecycle
   (start [this]
-    (let [tag-name (or tag-name ::tag)]
+    (let [var-tag (or var-tag ::tag)]
       (assoc this
-             :dic (build-dic (collect-vars tag-name ns-prefix) tag-name)
-             :tag-name tag-name)))
+             :dic (build-dic (collect-vars var-tag ns-tag) var-tag)
+             :var-tag var-tag)))
   (stop [this] this)
 
   proto/Finder
   (find [this target-key]
     (cond
       (keyword? target-key) (get (if dynamic?
-                                   (build-dic (collect-vars tag-name ns-prefix) tag-name)
+                                   (build-dic (collect-vars var-tag ns-tag) var-tag)
                                    (:dic this))
                                  target-key)
       (fn? target-key)      target-key)))
