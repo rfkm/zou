@@ -7,9 +7,11 @@
 (defmacro defhandler
   {:arglists '([name handler-name? doc-string? attr-map? [params*] prepost-map? body])}
   [name & fdecl]
-  (let [m (if (keyword? (first fdecl))
-            {:zou/handler (first fdecl)}
-            {})
+  (let [m {:zou/handler
+           (if (keyword? (first fdecl))
+             (first fdecl)
+             (keyword (clojure.core/name (ns-name *ns*))
+                      (clojure.core/name name)))}
         fdecl (if (keyword? (first fdecl))
                 (next fdecl)
                 fdecl)

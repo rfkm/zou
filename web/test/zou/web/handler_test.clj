@@ -31,6 +31,10 @@
     (sut/defhandler d :d [])
     (:zou/handler (meta #'d)) => :d)
 
+  (fact "default handler name"
+    (sut/defhandler e [])
+    (:zou/handler (meta #'e)) => :zou.web.handler-test/e)
+
   (fact "defhandler attaches `:zou/handler-ns` tag to the current ns"
     (un/with-temp-ns [ns '((zou.web.handler/defhandler foo []))]
       (:zou/handler-ns (meta ns)) => true)))
