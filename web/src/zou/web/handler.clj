@@ -23,7 +23,8 @@
                            fdecl
                            (throw (IllegalArgumentException. "Cannot find params")))
         spec (mapper/gen-destructuring-spec params)
-        m (assoc m :arglists (list 'quote (list (:params spec))))]
+        m (assoc m :arglists (list 'quote (list (:params spec))))
+        m (conj (if (meta name) (meta name) {}) m)]
     `(let [mapper# (:fn (mapper/gen-destructuring-spec (quote ~params)))]
        (def ~(with-meta name m)
          (vary-meta

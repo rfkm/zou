@@ -20,3 +20,8 @@
       [a])
     (meta #'b) => (contains {:doc "doc"
                              :a :b})))
+
+(t/deftest defhandler-metadata-test
+  (fact
+    (sut/defhandler ^:foo c [])
+    (contains? (meta #'c) :foo) => true))
