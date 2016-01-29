@@ -10,6 +10,7 @@
                  [ring.middleware.conditional "0.2.0"]
                  [ring-webjars "0.1.1"]
                  [bidi "1.25.0"]
+                 [com.cemerick/url "0.1.1"]
                  [prone "1.0.1"]
                  [hawk "0.2.9"]]
   :plugins [[lein-modules "0.3.11"]])
