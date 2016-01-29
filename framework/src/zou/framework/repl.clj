@@ -1,9 +1,14 @@
 (ns zou.framework.repl
+  (:refer-clojure :exclude [$])
   (:require [clojure.tools.namespace.repl :as tnr]
             [zou.framework.config :as conf]
-            [zou.framework.core :as core]))
+            [zou.framework.core :as core]
+            [zou.util.namespace :as ns]))
+
+(declare inject-util-to-core)
 
 (defn go []
+  (inject-util-to-core)
   (core/boot-core!)
   (core/load-systems (core/core) (conf/fetch-config-or-abort))
   (doseq [k (keys (core/systems (core/core)))]
@@ -22,6 +27,11 @@
 
 (defn system [& ks]
   (get-in (core/systems (core/core)) ks))
+
+(def $ #'system)
+
+(defn inject-util-to-core []
+  (ns/inject clojure.core $))
 
 (defn systems []
   (core/systems (core/core)))
