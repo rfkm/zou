@@ -16,6 +16,9 @@
 
     (fact "coerces env into keyword"
       (with-redefs [env/env {:zou-env "dev"}]
+        (sut/app-env)) => :dev
+
+      (with-redefs [env/env {:zou-env ":dev"}]
         (sut/app-env)) => :dev))
 
   (fact "with-env"

@@ -26,7 +26,7 @@
   :profiles {:uberjar {:env {:prod true}
                        :aot [zou.framework.main #".*"]{{#cljs?}}
                        :hooks [leiningen.cljsbuild]{{/cljs?}}}
-             :dev {:env {:zou-env :dev}
+             :dev {:env {:zou-env "dev"}
                    :dependencies [[zou/devel ~zou-version{{^cljs?}} :exclusions [zou/cljs-devel]{{/cljs?}}]{{#midje?}}
                                   [midje "1.8.2"]{{/midje?}}{{#cljs?}}
                                   [com.cemerick/piggieback "0.2.1"]{{/cljs?}}]

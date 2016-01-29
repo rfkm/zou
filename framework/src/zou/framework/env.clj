@@ -6,8 +6,13 @@
 (def hierarchy (-> (make-hierarchy)
                    (derive :test :dev)))
 
+(defn- keyword' [^String s]
+  (keyword (if (.startsWith s ":")
+             (subs s 1)
+             s)))
+
 (defn- normalize-env [x]
-  (some-> x name keyword))
+  (some-> x name keyword'))
 
 (defn app-env
   "Returns name of current application environment as a keyword."
