@@ -16,7 +16,7 @@
                         :resource-paths ~(into (subdir "dev-resources")
                                                (subdir "resources"))
                         :plugins      [[lein-cloverage "1.0.7-SNAPSHOT"]
-                                       [lein-exec "0.3.5"]]
+                                       [lein-exec "0.3.6"]]
                         :dependencies [[zou/devel :version]
                                        [cheshire "5.5.0"]
                                        [org.clojure/tools.cli "0.3.3"]
@@ -25,18 +25,18 @@
                                                          :username   :env/aws_access_key_id
                                                          :passphrase :env/aws_secret_access_key}]]
                       :plugins [[s3-wagon-private "1.2.0"]]}
-             :dev {:dependencies [[org.clojure/clojurescript "1.7.170"]
-                                  [midje "1.8.2"]
-                                  [org.clojure/clojure "1.7.0"]
-                                  [clj-http "2.0.0"]
+             :dev {:dependencies [[org.clojure/clojurescript "1.7.228"]
+                                  [midje "1.8.3"]
+                                  [org.clojure/clojure "1.8.0"]
+                                  [clj-http "2.0.1"]
                                   [ring/ring-mock "0.3.0"]
                                   [org.clojure/java.jdbc "0.4.2"]
-                                  [org.postgresql/postgresql "9.4-1204-jdbc42"]
-                                  [com.h2database/h2 "1.4.190"]
+                                  [org.postgresql/postgresql "9.4.1207"]
+                                  [com.h2database/h2 "1.4.191"]
                                   [enlive "1.1.6"]
                                   [hiccup "1.0.5"]
                                   [stencil "0.5.0"]
-                                  [selmer "0.9.5"]]
+                                  [selmer "1.0.0"]]
                    :plugins      [[lein-midje "3.2"]]
                    :env          {:zou-env :dev}
                    :aliases      {"coverage" ["with-profile" "+coverage" "do"
@@ -52,4 +52,4 @@
              :license             {:name "Eclipse Public License"
                                    :url "http://www.eclipse.org/legal/epl-v10.html"}
              :scm                 {:dir ".."}
-             :plugins             [[lein-environ "1.0.1"]]}})
+             :plugins             [[lein-environ "1.0.2"]]}})
