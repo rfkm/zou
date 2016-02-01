@@ -1,6 +1,7 @@
 {:server
  {:zou/constructor  zou.web.immutant-web/map->WebServer
   :zou/dependencies {:handler :endpoint}
+  :host             "0.0.0.0"
   :port             3000}
 
  :endpoint
