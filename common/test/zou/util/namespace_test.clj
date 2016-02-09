@@ -3,7 +3,8 @@
             [clojure.test :as t]
             [hara.namespace.eval :as ne]
             [midje.sweet :refer :all]
-            [zou.util.namespace :as sut]))
+            [zou.util.namespace :as sut]
+            [clojure.java.io :as io]))
 
 (fact "with-temp-ns"
   (fact "basic"
@@ -53,16 +54,28 @@
   (fact "require-all"
     (sut/require-all nil "foo") => nil
     (provided
-      (b/namespaces-on-classpath :prefix "foo") => (list 'foo.bar 'foo.baz)
-      (require 'foo.bar) => nil
-      (require 'foo.baz) => nil))
+     (b/namespaces-on-classpath :prefix "foo") => (list 'foo.bar 'foo.baz)
+     (require 'foo.bar) => nil
+     (require 'foo.baz) => nil))
+
+  (fact "classpath-files"
+    (let [to-path-coll #(map (fn [f] (.getAbsolutePath f)) %)]
+      (to-path-coll (#'sut/classpath-files)) => (contains (.getAbsolutePath (io/file "src")))
+      (to-path-coll (#'sut/classpath-files)) => (contains (.getAbsolutePath (io/file "test")))
+      (to-path-coll (#'sut/classpath-files "src")) =not=> (contains (.getAbsolutePath (io/file "src")))
+      (to-path-coll (#'sut/classpath-files "src")) => (contains (.getAbsolutePath (io/file "test")))
+      (to-path-coll (#'sut/classpath-files "src:test")) =not=> (contains (.getAbsolutePath (io/file "src")))
+      (to-path-coll (#'sut/classpath-files "src:test")) =not=> (contains (.getAbsolutePath (io/file "test")))
+      (to-path-coll (#'sut/classpath-files ["src" "test"])) =not=> (contains (.getAbsolutePath (io/file "src")))
+      (to-path-coll (#'sut/classpath-files ["src" "test"])) =not=> (contains (.getAbsolutePath (io/file "test")))))
 
   (fact "require-all w/ classpath"
     (sut/require-all "test" "zou.util") => nil
     (provided
-      (b/namespaces-on-classpath :prefix "zou.util" :classpath "test") => (list 'foo.bar 'foo.baz)
-      (require 'foo.bar) => nil
-      (require 'foo.baz) => nil)))
+     (#'sut/classpath-files "test") => ..filtered-classpath-files..
+     (b/namespaces-on-classpath :prefix "zou.util" :classpath ..filtered-classpath-files..) => (list 'foo.bar 'foo.baz)
+     (require 'foo.bar) => nil
+     (require 'foo.baz) => nil)))
 
 (t/deftest contains-tagged-var-test
   (facts "contains-tagged-var?"

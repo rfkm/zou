@@ -1,6 +1,7 @@
 (ns zou.util.namespace
   (:require [bultitude.core :as b]
             [clojure.tools.logging :as log]
+            [clojure.java.io :as io]
             [hara.namespace.eval :as ne]
             [potemkin.namespaces :as pn]))
 
@@ -21,11 +22,30 @@
     (resolve-var sym)
     (catch Throwable _)))
 
-(defn require-all [classpath & prefixes]
+(defn- normalize-classpath [classpath]
+  (cond
+    (string? classpath)
+    (.split classpath (System/getProperty "path.separator"))
+
+    (coll? classpath)
+    classpath
+
+    :else
+    (throw (ex-info "classpath` must be a collection or string" {:classpath classpath}))))
+
+(defn- classpath-files
+  ([]
+   (classpath-files []))
+  ([exclude-classpath]
+   (let [exclude-classpath (normalize-classpath exclude-classpath)
+         fs                (set (map #(-> % io/file .getAbsolutePath) exclude-classpath))]
+     (remove #(fs (.getAbsolutePath %)) (b/classpath-files)))))
+
+(defn require-all [exclude-classpath & prefixes]
   (doseq [prefix prefixes
-          ns (if classpath
-               (b/namespaces-on-classpath :prefix prefix :classpath classpath)
-               (b/namespaces-on-classpath :prefix prefix))]
+          ns     (if exclude-classpath
+                   (b/namespaces-on-classpath :prefix prefix :classpath (classpath-files exclude-classpath))
+                   (b/namespaces-on-classpath :prefix prefix))]
     (log/debug "Loading:" ns)
     (require ns)))
 
