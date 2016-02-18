@@ -5,7 +5,7 @@
 (defn subdir [path]
   (mapv #(str % "/" path) modules))
 
-(defproject zou "0.1.0-alpha2"
+(defproject zou "0.1.0-alpha3-SNAPSHOT"
   :dependencies [[zou/common :version]
                  [zou/framework :version]
                  [zou/web :version]

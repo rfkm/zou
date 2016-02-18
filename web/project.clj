@@ -1,4 +1,4 @@
-(defproject zou/web "0.1.0-alpha2"
+(defproject zou/web "0.1.0-alpha3-SNAPSHOT"
   :dependencies [[zou/common :version]
                  [zou/component :version]
                  [org.immutant/web "2.1.2"]
