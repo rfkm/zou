@@ -39,13 +39,20 @@
                                        [hiccup "1.0.5"]
                                        [stencil "0.5.0"]
                                        [selmer "1.0.0"]]
-                        :plugins      [[lein-midje "3.2"]]
+                        :plugins      [[lein-midje "3.2"]
+                                       [lein-file-replace "0.1.0"]]
                         :env          {:zou-env "dev"}
                         :aliases      {"coverage" ["with-profile" "+coverage" "do"
                                                    ["cloverage" "--codecov"]
                                                    ["exec" "-p" "etc/codecov.clj"]]
                                        "modules+" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl)]
-                                       "modules++" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl+parent)]}}}
+                                       "modules++" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl+parent)]
+                                       "bump-template-zou-version"
+                                       ["file-replace"
+                                        "lein-template/resources/leiningen/new/zou/project.clj"
+                                        "zou-version \""
+                                        "\""
+                                        "version"]}}}
   :modules {:dirs       ~modules
             :subprocess nil
             :inherited
@@ -60,9 +67,11 @@
 
   :release-tasks [["vcs" "assert-committed"]
                   ["modules++" "change" "version" "leiningen.release/bump-version" "release"]
+                  ["bump-template-zou-version"]
                   ["vcs" "commit"]
                   ["vcs" "tag"]
                   ["with-profile" "+deploy" "modules++" "deploy"]
                   ["modules++" "change" "version" "leiningen.release/bump-version"]
+                  ["bump-template-zou-version"]
                   ["vcs" "commit"]
                   ["vcs" "push"]])
