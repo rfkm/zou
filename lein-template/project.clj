@@ -4,8 +4,10 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :eval-in-leiningen true
-  :deploy-repositories [["snapshots" {:url "https://clojars.org/repo/"
-                                      :username [:gpg :env]
-                                      :password [:gpg :env]}]
-                        ["releases" {:url "https://clojars.org/repo/"
-                                     :creds :gpg}]])
+  :plugins [[lein-modules "0.3.11"]]
+  :deploy-repositories
+  [["clojars-env" {:url "https://clojars.org/repo/"
+                   :username [:gpg :env]
+                   :password [:gpg :env]}]
+   ^:replace ["snapshots" :clojars-env]
+   ^:replace ["releases" :clojars-env]])

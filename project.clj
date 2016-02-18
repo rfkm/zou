@@ -1,6 +1,6 @@
 (def modules ["common" "component" "framework" "web" "db" "cljs-devel" "devel"])
-(def meta-modules ["devel"])
-(def non-meta-modules (remove (set meta-modules) modules))
+(def modules+tpl (conj modules "lein-template"))
+(def modules+tpl+parent (conj modules+tpl "."))
 
 (defn subdir [path]
   (mapv #(str % "/" path) modules))
@@ -23,7 +23,9 @@
                                          [cloverage "1.0.7-SNAPSHOT" :exclusions [org.clojure/tools.cli]]]}
              :deploy   {:deploy-repositories [["zou-repo" {:url        "s3p://zou-repo/"
                                                            :username   :env/aws_access_key_id
-                                                           :passphrase :env/aws_secret_access_key}]]
+                                                           :passphrase :env/aws_secret_access_key}]
+                                              ["releases" :zou-repo]
+                                              ["snapshots" :zou-repo]]
                         :plugins             [[s3-wagon-private "1.2.0"]]}
              :dev      {:dependencies [[org.clojure/clojurescript "1.7.228"]
                                        [midje "1.8.3"]
@@ -41,7 +43,9 @@
                         :env          {:zou-env "dev"}
                         :aliases      {"coverage" ["with-profile" "+coverage" "do"
                                                    ["cloverage" "--codecov"]
-                                                   ["exec" "-p" "etc/codecov.clj"]]}}}
+                                                   ["exec" "-p" "etc/codecov.clj"]]
+                                       "modules+" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl)]
+                                       "modules++" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl+parent)]}}}
   :modules {:dirs       ~modules
             :subprocess nil
             :inherited
@@ -52,4 +56,13 @@
              :license      {:name "Eclipse Public License"
                             :url  "http://www.eclipse.org/legal/epl-v10.html"}
              :scm          {:dir ".."}
-             :plugins      [[lein-environ "1.0.2"]]}})
+             :plugins      [[lein-environ "1.0.2"]]}}
+
+  :release-tasks [["vcs" "assert-committed"]
+                  ["modules++" "change" "version" "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag"]
+                  ["with-profile" "+deploy" "modules++" "deploy"]
+                  ["modules++" "change" "version" "leiningen.release/bump-version"]
+                  ["vcs" "commit"]
+                  ["vcs" "push"]])

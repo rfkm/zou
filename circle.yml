@@ -18,5 +18,4 @@ deployment:
   snapshot:
     branch: master
     commands:
-      - lein with-profile +deploy do modules deploy zou-repo, deploy zou-repo
-      - cd lein-template && lein deploy snapshots
+      - lein with-profile +deploy modules++ deploy snapshots
