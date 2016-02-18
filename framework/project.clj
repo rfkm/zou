@@ -1,4 +1,4 @@
-(defproject zou/framework "0.1.0-alpha1-SNAPSHOT"
+(defproject zou/framework "0.1.0-alpha1"
   :dependencies [[zou/common :version]
                  [zou/component :version]
                  [rkworks/baum "0.3.0"]
