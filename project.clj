@@ -52,6 +52,12 @@
                                         "lein-template/resources/leiningen/new/zou/project.clj"
                                         "zou-version \""
                                         "\""
+                                        "version"]
+                                       "bump-readme-zou-version"
+                                       ["file-replace"
+                                        "README.md"
+                                        "zou \""
+                                        "\"]"
                                         "version"]}}}
   :modules {:dirs       ~modules
             :subprocess nil
@@ -68,6 +74,7 @@
   :release-tasks [["vcs" "assert-committed"]
                   ["modules++" "change" "version" "leiningen.release/bump-version" "release"]
                   ["bump-template-zou-version"]
+                  ["bump-readme-zou-version"]
                   ["vcs" "commit"]
                   ["vcs" "tag"]
                   ["with-profile" "+deploy" "modules++" "deploy"]

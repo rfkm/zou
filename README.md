@@ -5,8 +5,24 @@
 
 **Zou** is a component-based framework for Clojure applications.
 
+# Setup
+
+Zou is not hosted on standard repositories like Clojars or Maven Central but our own repository.
+So you need to add our repository to your `project.clj`:
+
+```clj
+(defproject your/app "0.1.0-SNAPSHOT"
+  ...
+  :repositories [["zou-repo"
+                  {:url "https://s3.amazonaws.com/zou-repo"}]]
+  :dependencies [...
+                 [zou "0.1.0-alpha2"]
+                 ...]
+  ...)
+```
+
 ## License
 
-Copyright © 2015 Ryo Fukumuro
+Copyright © 2015-2016 Ryo Fukumuro
 
 Distributed under the Eclipse Public License, the same as Clojure.
