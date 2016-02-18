@@ -4,10 +4,9 @@
             [zou.web.handler.args-mapper :as mapper]
             [zou.web.middleware.proto :as proto]))
 
-(defmacro defhandler
-  {:arglists '([name handler-name? doc-string? attr-map? [params*] prepost-map? body])}
-  [name & fdecl]
-  (let [m {:zou/handler
+(defmacro -defhandler
+  [handler-tag ns-tag name & fdecl]
+  (let [m {handler-tag
            (if (keyword? (first fdecl))
              (first fdecl)
              (keyword (clojure.core/name (ns-name *ns*))
@@ -34,13 +33,18 @@
         m (assoc m :arglists (list 'quote (list (:params spec))))
         m (conj (if (meta name) (meta name) {}) m)]
     `(let [mapper# (:fn (mapper/gen-destructuring-spec (quote ~params)))]
-       (alter-meta! *ns* assoc :zou/handler-ns true)
+       (alter-meta! *ns* assoc ~ns-tag true)
        (def ~(with-meta name m)
          (vary-meta
           (fn ~(:params spec) ~@fdecl)
           assoc
           :zou/args-mapper
           mapper#)))))
+
+(defmacro defhandler
+  {:arglists '([name handler-name? doc-string? attr-map? [params*] prepost-map? body])}
+  [name & fdecl]
+  `(-defhandler :zou/handler :zou/handler-ns ~name ~@fdecl))
 
 (defn invoke-with-mapper [f arg]
   (let [f (if (var? f) @f f)]
