@@ -1,4 +1,4 @@
-(defproject zou/lein-template "0.1.0-alpha2-SNAPSHOT"
+(defproject zou/lein-template "0.1.0-alpha2"
   :description "Leiningen template for Zou"
   :url "http://github.com/rfkm/zou"
   :license {:name "Eclipse Public License"

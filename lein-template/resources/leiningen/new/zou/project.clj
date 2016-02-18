@@ -1,4 +1,4 @@
-(def zou-version "0.1.0-SNAPSHOT")
+(def zou-version "0.1.0-alpha2")
 
 (defproject {{raw-name}} "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
