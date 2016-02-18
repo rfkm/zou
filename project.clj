@@ -30,7 +30,7 @@
              :dev      {:dependencies [[org.clojure/clojurescript "1.7.228"]
                                        [midje "1.8.3"]
                                        [org.clojure/clojure "1.8.0"]
-                                       [clj-http "2.0.1"]
+                                       [clj-http "2.1.0"]
                                        [ring/ring-mock "0.3.0"]
                                        [org.clojure/java.jdbc "0.4.2"]
                                        [org.postgresql/postgresql "9.4.1207"]

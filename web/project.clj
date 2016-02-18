@@ -1,7 +1,7 @@
 (defproject zou/web "0.1.0-SNAPSHOT"
   :dependencies [[zou/common :version]
                  [zou/component :version]
-                 [org.immutant/web "2.1.1"]
+                 [org.immutant/web "2.1.2"]
                  [ring/ring-core "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
                  [ring/ring-devel "1.4.0"]
@@ -9,8 +9,8 @@
                  [ring-logger "0.7.5"]
                  [ring.middleware.conditional "0.2.0"]
                  [ring-webjars "0.1.1"]
-                 [bidi "1.25.0"]
+                 [bidi "1.25.1"]
                  [com.cemerick/url "0.1.1"]
-                 [prone "1.0.1"]
-                 [hawk "0.2.9"]]
+                 [prone "1.0.2"]
+                 [hawk "0.2.10"]]
   :plugins [[lein-modules "0.3.11"]])
