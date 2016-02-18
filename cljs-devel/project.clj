@@ -1,4 +1,4 @@
-(defproject zou/cljs-devel "0.1.0-alpha1"
+(defproject zou/cljs-devel "0.1.0-alpha2-SNAPSHOT"
   :dependencies [[zou/common :version]
                  [zou/web :version]
                  [figwheel-sidecar "0.5.0-6"]]
