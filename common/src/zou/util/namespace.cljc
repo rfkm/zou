@@ -4,8 +4,7 @@
                  [clojure.tools.logging :as log]
                  [clojure.java.io :as io]
                  [hara.namespace.eval :as ne]
-                 [potemkin.namespaces :as pn]])
-            [zou.util.platform :as platform]))
+                 [potemkin.namespaces :as pn]])))
 
 (defmacro cljs-import-vars [& syms]
   (let [unravel (fn unravel [x]
@@ -28,16 +27,16 @@
           syms))))
 
 (defmacro import-vars [& syms]
-  `(platform/if-cljs
-    (cljs-import-vars ~@syms)
-    (pn/import-vars ~@syms)))
+  `(pn/import-vars ~@syms))
 
 #?(:clj
    (defmacro cljs-import-ns*
      ([ns exclusions]
       (require 'cljs.analyzer.api)
-      `(import-vars ~(into [ns] (remove (set exclusions)
-                                        (keys ((ns-resolve 'cljs.analyzer.api 'ns-publics) ns))))))))
+      `(cljs-import-vars ~(into [ns] (->> ((ns-resolve 'cljs.analyzer.api 'ns-publics) ns)
+                                          (remove (comp :macro second))
+                                          keys
+                                          (remove (set exclusions))))))))
 
 #?(:clj
    (defmacro import-ns* [ns exclusions]
@@ -51,12 +50,16 @@
   ([ns]
    `(import-ns ~ns #{}))
   ([ns exclusions]
-   `(platform/if-cljs
-     ;; NB: The CLJS version doesn't automatically require namespaces
-     ;; the vars to import belong to, so you need to add them
-     ;; explicitly to the ns declaration.
-     (cljs-import-ns* ~ns ~exclusions)
-     (import-ns* ~ns ~exclusions))))
+   `(import-ns* ~ns ~exclusions)))
+
+(defmacro cljs-import-ns
+  ;; NB: The CLJS version doesn't automatically require namespaces the
+  ;; vars to import belong to, so you need to add them explicitly to
+  ;; the ns declaration. Also, it doesn't import macros.
+  ([ns]
+   `(cljs-import-ns ~ns #{}))
+  ([ns exclusions]
+   `(cljs-import-ns* ~ns ~exclusions)))
 
 
 ;;; Clj only stuff
