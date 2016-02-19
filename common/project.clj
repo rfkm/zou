@@ -1,6 +1,7 @@
 (defproject zou/common "0.1.0-alpha3-SNAPSHOT"
   :dependencies [[org.clojure/tools.logging "0.3.1"]
                  [spootnik/unilog "0.7.13"]
+                 [shodan "0.4.2"]
                  [io.aviso/pretty "0.1.23"]
                  [prismatic/schema "1.0.5"]
                  [bultitude "0.2.8"]
