@@ -12,6 +12,7 @@ dependencies:
 test:
   override:
     - lein coverage
+    - lein with-profile +cljs-test doo phantom test once
   post:
     - bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov_fixed.json
 deployment:
