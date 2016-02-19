@@ -55,6 +55,7 @@
                         :env          {:zou-env "dev"}
                         :aliases      {"coverage" ["with-profile" "+coverage" "do"
                                                    ["cloverage" "--codecov"
+                                                    "-e" "zou.specter"
                                                     "-e" "zou.logging"
                                                     "-e" "zou.util"
                                                     "-e" "zou.util.platform"

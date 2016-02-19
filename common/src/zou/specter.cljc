@@ -1,8 +1,9 @@
 (ns zou.specter
   (:require [com.rpl.specter]
-            [zou.util.namespace :as ns]))
+            [zou.util.namespace :as ns :include-macros true]))
 
-(ns/import-ns com.rpl.specter)
+#?(:clj (ns/import-ns com.rpl.specter)
+   :cljs (ns/cljs-import-ns com.rpl.specter))
 
 
 ;;; Extensions
