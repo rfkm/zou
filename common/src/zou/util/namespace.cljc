@@ -7,7 +7,7 @@
                  [potemkin.namespaces :as pn]])
             [zou.util.platform :as platform]))
 
-(defmacro ^:private cljs-import-vars [& syms]
+(defmacro cljs-import-vars [& syms]
   (let [unravel (fn unravel [x]
                   (if (sequential? x)
                     (->> x
@@ -33,14 +33,14 @@
     (pn/import-vars ~@syms)))
 
 #?(:clj
-   (defmacro ^:private cljs-import-ns*
+   (defmacro cljs-import-ns*
      ([ns exclusions]
       (require 'cljs.analyzer.api)
       `(import-vars ~(into [ns] (remove (set exclusions)
                                         (keys ((ns-resolve 'cljs.analyzer.api 'ns-publics) ns))))))))
 
 #?(:clj
-   (defmacro ^:private import-ns* [ns exclusions]
+   (defmacro import-ns* [ns exclusions]
      (require ns)
      `(do
         (require (quote ~ns))
