@@ -1,12 +1,15 @@
 (ns zou.util
-  (:require [clojure.set :as set]
-            [com.rpl.specter :as s]
-            [medley.core]
+  (:require [medley.core]
             [plumbing.core]
-            [zou.util.namespace :as ns]))
+            [zou.util.namespace :as ns :include-macros true]))
 
-(ns/import-ns plumbing.core)
-(ns/import-ns medley.core)
+;;; TODO: suppress warnings
+#?(:clj (do
+          (ns/import-ns plumbing.core)
+          (ns/import-ns medley.core))
+   :cljs (do
+           (ns/cljs-import-ns plumbing.core)
+           (ns/cljs-import-ns medley.core)))
 
 (defmacro with-arglists
   "Inherit arglists from the given var as follows:
@@ -32,13 +35,15 @@
        (apply f maps)))
    maps))
 
-(defn crc32-hex [s]
-  (let [c (java.util.zip.CRC32.)]
-    (.update c (.getBytes (name s)))
-    (format "%X" (.getValue c))))
-
 (defn maybe-deref [ref]
-  (if (or (instance? clojure.lang.IDeref ref)
-          (instance? java.util.concurrent.Future ref))
+  (if #?(:clj (or (instance? clojure.lang.IDeref ref)
+                  (instance? java.util.concurrent.Future ref))
+         :cljs (satisfies? IDeref ref))
     (deref ref)
     ref))
+
+#?(:clj
+   (defn crc32-hex [s]
+     (let [c (java.util.zip.CRC32.)]
+       (.update c (.getBytes (name s)))
+       (format "%X" (.getValue c)))))
