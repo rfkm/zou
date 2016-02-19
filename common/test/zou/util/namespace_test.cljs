@@ -3,8 +3,7 @@
             [zou.util.namespace :as sut :include-macros true]
             ;; fixture
             [zou.util.namespace.foo]
-            [zou.util.namespace.bar])
-  (:require-macros [zou.util.platform.m :as m]))
+            [zou.util.namespace.bar]))
 
 
 (t/deftest import-ns-test
