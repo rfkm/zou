@@ -15,12 +15,11 @@
                         :test-paths     ~(subdir "test")
                         :resource-paths ~(into (subdir "dev-resources")
                                                (subdir "resources"))
-                        :plugins        [[lein-cloverage "1.0.7-SNAPSHOT"]
+                        :plugins        [[rfkm/lein-cloverage "1.0.9-SNAPSHOT"]
                                          [lein-exec "0.3.6"]]
                         :dependencies   [[zou/devel :version]
                                          [cheshire "5.5.0"]
-                                         [org.clojure/tools.cli "0.3.3"]
-                                         [cloverage "1.0.7-SNAPSHOT" :exclusions [org.clojure/tools.cli]]]}
+                                         [org.clojure/tools.cli "0.3.3"]]}
              :deploy   {:deploy-repositories [["zou-repo" {:url        "s3p://zou-repo/"
                                                            :username   :env/aws_access_key_id
                                                            :passphrase :env/aws_secret_access_key}]
@@ -54,12 +53,7 @@
                                        [lein-file-replace "0.1.0"]]
                         :env          {:zou-env "dev"}
                         :aliases      {"coverage" ["with-profile" "+coverage" "do"
-                                                   ["cloverage" "--codecov"
-                                                    "-e" "zou.specter"
-                                                    "-e" "zou.logging"
-                                                    "-e" "zou.util"
-                                                    "-e" "zou.util.platform"
-                                                    "-e" "zou.util.namespace"]
+                                                   ["cloverage" "--codecov"]
                                                    ["exec" "-p" "etc/codecov.clj"]]
                                        "modules+" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl)]
                                        "modules++" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl+parent)]
