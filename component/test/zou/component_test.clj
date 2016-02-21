@@ -1,155 +1,172 @@
 (ns zou.component-test
   (:require [clojure.test :as t]
             [com.stuartsierra.component :as c]
-            [midje.sweet :refer :all]
             [zou.component :as sut]))
 
 (defrecord FooComponent [])
+(defrecord StatefulComponent [state]
+  c/Lifecycle
+  (start [this]
+    (swap! state conj :started)
+    (assoc this :started true))
+  (stop [this]
+    (swap! state conj :stopped)
+    (assoc this :stopped true)))
+
+(defn new-stateful-component [_]
+  (->StatefulComponent (atom [])))
 
 (t/deftest ctor-test
-  (fact "system-ctors"
-    (#'sut/system-ctors {:a {:zou/constructor ..a-ctor.. :_ :_}
-                         :b {:_ :_}})
-    =>
-    {:a ..a-ctor..
-     :b identity}
+  (let [ctor (fn [m])]
+    (t/is (= (#'sut/system-ctors {:a {:zou/constructor ctor :_ :_}
+                                  :b {:_ :_}})
+             {:a ctor
+              :b identity})))
 
-    (#'sut/system-ctors {:a {:zou/constructor 'identity}})
-    =>
-    {:a #'identity}))
+  (t/testing "resolving"
+    (t/is (= (#'sut/system-ctors {:a {:zou/constructor 'identity}})
+             {:a #'identity}))))
 
 (t/deftest deps-test
-  (fact "system-deps"
-    (#'sut/system-deps {:c1 {:zou/constructor  identity
-                             :zou/dependencies {:a :a :b' :b}
-                             }
-                        :c2 {:zou/constructor identity}})
-    =>
-    {:c1 {:a  :a
-          :b' :b}}))
+  (t/is
+   (= (#'sut/system-deps {:c1 {:zou/constructor  identity
+                               :zou/dependencies {:a :a :b' :b}
+                               }
+                          :c2 {:zou/constructor identity}})
+      {:c1 {:a  :a
+            :b' :b}})))
 
 (t/deftest conf-test
-  (fact "system-confs"
-    (#'sut/system-confs {:c1 {:a :a}
-                         :c2 {:zou/constructor identity
-                              :b               :b}})
-    =>
-    {:c1 {:a :a}
-     :c2 {:b :b}}))
+  (t/is
+   (= (#'sut/system-confs {:c1 {:a :a}
+                           :c2 {:zou/constructor identity
+                                :b               :b}})
+      {:c1 {:a :a}
+       :c2 {:b :b}})))
 
 (t/deftest dependants-test
-  (fact "translate-dependants"
-    (#'sut/translate-dependants {:c1 {:zou/dependencies {:a :a :b' :b}
-                                      :zou/dependants   {:c3 :c1'}}
-                                 :c2 {}
-                                 :c3 {:zou/dependencies {:c4' :c4}
-                                      :zou/dependants   {:c2 :c3'}}
-                                 :c4 {}})
-    =>
-    {:c1 {:zou/dependencies {:a :a :b' :b}}
-     :c2 {:zou/dependencies {:c3' :c3}}
-     :c3 {:zou/dependencies {:c1' :c1 :c4' :c4}}
-     :c4 {}}))
+  (t/is
+   (= (#'sut/translate-dependants {:c1 {:zou/dependencies {:a :a :b' :b}
+                                        :zou/dependants   {:c3 :c1'}}
+                                   :c2 {}
+                                   :c3 {:zou/dependencies {:c4' :c4}
+                                        :zou/dependants   {:c2 :c3'}}
+                                   :c4 {}})
+
+      {:c1 {:zou/dependencies {:a :a :b' :b}}
+       :c2 {:zou/dependencies {:c3' :c3}}
+       :c3 {:zou/dependencies {:c1' :c1 :c4' :c4}}
+       :c4 {}})))
 
 (t/deftest optionals-test
-  (fact "translate-optionals"
-    (#'sut/translate-optionals {:c1           {:zou/optionals {:a :non-existent-key
-                                                               :b :existent-key}}
-                                :existent-key {:a :b}})
-    =>
-    {:c1           {:zou/dependencies {:b :existent-key}}
-     :existent-key {:a :b :zou/dependencies {}}}))
+  (t/is
+   (= (#'sut/translate-optionals {:c1           {:zou/optionals {:a :non-existent-key
+                                                                 :b :existent-key}}
+                                  :existent-key {:a :b}})
+      {:c1           {:zou/dependencies {:b :existent-key}}
+       :existent-key {:a :b :zou/dependencies {}}})))
 
 (t/deftest tags-test
-  (fact "translate-tags"
-    (#'sut/translate-tags {:c1 {:zou/tags [:tag1 [:tag2 :c1']] :a :b}
-                           :c2 {:zou/tags [:tag1 [:tag2 :c2']] :a :b}
-                           :c3 {:zou/dependencies {:tagged :tag1}}
-                           :c4 {:zou/dependencies {:tagged :tag2}}})
-    =>
-    {:c1   {:a :b}
-     :c2   {:a :b}
-     :c3   {:zou/dependencies {:tagged :tag1}}
-     :c4   {:zou/dependencies {:tagged :tag2}}
-     :tag1 {:zou/dependencies {:c1 :c1 :c2 :c2}}
-     :tag2 {:zou/dependencies {:c1' :c1 :c2' :c2}}}
+  (t/is
+   (= (#'sut/translate-tags {:c1 {:zou/tags [:tag1 [:tag2 :c1']] :a :b}
+                             :c2 {:zou/tags [:tag1 [:tag2 :c2']] :a :b}
+                             :c3 {:zou/dependencies {:tagged :tag1}}
+                             :c4 {:zou/dependencies {:tagged :tag2}}})
+      {:c1   {:a :b}
+       :c2   {:a :b}
+       :c3   {:zou/dependencies {:tagged :tag1}}
+       :c4   {:zou/dependencies {:tagged :tag2}}
+       :tag1 {:zou/dependencies {:c1 :c1 :c2 :c2}}
+       :tag2 {:zou/dependencies {:c1' :c1 :c2' :c2}}}))
 
-    (#'sut/translate-tags {:c1 {:zou/tags [:tag1]} :tag1 {:a :b}})
-    => {:c1   {}
-        :tag1 {:zou/dependencies {:c1 :c1} :a :b}}))
+  (t/is
+   (= (#'sut/translate-tags {:c1 {:zou/tags [:tag1]} :tag1 {:a :b}})
+      {:c1   {}
+       :tag1 {:zou/dependencies {:c1 :c1} :a :b}})))
+
+(= (map->FooComponent {:b :b})
+   (map->FooComponent {:b :b}))
 
 (t/deftest build-system-map-test
-  (fact "build-system-map"
-    (sut/build-system-map {:c1 {:a :a}
-                           :c2 {:zou/constructor  map->FooComponent
-                                :zou/dependencies {:c1 :c1}
-                                :zou/dependants   {:c7 :c2'}
-                                :b                :b}
-                           :c3 [:a :b]
-                           :c4 false                ; should be ignored
-                           :c5 nil                  ; should be ignored
-                           :c6 {:zou/disabled true} ; should be ignored
-                           :c7 {}})
-    =>
-    ..system-map+deps..
-    (provided
-     (map->FooComponent {:b :b}) => ..foo..
-     (c/map->SystemMap {:c1 {:a :a} :c2 ..foo.. :c3 [:a :b] :c7 {}}) => ..system-map..
-     (c/system-using ..system-map.. {:c1 {} :c2 {:c1 :c1} :c7 {:c2' :c2}}) => ..system-map+deps..)
+  (t/testing "dependencies+dependants"
+    (let [sys (sut/build-system-map {:c1 {:a :a}
+                                     :c2 {:zou/constructor  map->FooComponent
+                                          :zou/dependencies {:c1 :c1}
+                                          :zou/dependants   {:c7 :c2'}
+                                          :b                :b}
+                                     :c3 [:a :b]
+                                     :c4 false ; should be ignored
+                                     :c5 nil   ; should be ignored
+                                     :c6 {:zou/disabled true} ; should be ignored
+                                     :c7 {}})]
+      (t/is (= sys
+               (c/map->SystemMap {:c1 {:a :a}
+                                  :c2 (map->FooComponent {:b :b})
+                                  :c3 [:a :b]
+                                  :c7 {}})))
+      (t/is (= (c/dependencies (:c2 sys))
+               {:c1 :c1}))
+      (t/is (= (c/dependencies (:c7 sys))
+               {:c2' :c2}))))
 
-    (sut/build-system-map {:c1 {:zou/tags [:tag1 [:tag2 :c1']]}
-                           :c2 {:zou/dependencies {:tagged :tag1}}
-                           :c3 {:zou/dependencies {:tagged :tag2}}})
-    => ..system-map+deps..
-    (provided
-     (c/map->SystemMap {:c1 {} :c2 {} :c3 {} :tag1 {} :tag2 {}}) => ..system-map..
-     (c/system-using ..system-map.. {:c1   {}
-                                     :c2   {:tagged :tag1}
-                                     :c3   {:tagged :tag2}
-                                     :tag1 {:c1 :c1}
-                                     :tag2 {:c1' :c1}})
-     =>
-     ..system-map+deps..)))
+  (t/testing "tags"
+    (let [sys (sut/build-system-map {:c1 {:zou/tags [:tag1 [:tag2 :c1']]}
+                                     :c2 {:zou/dependencies {:tagged :tag1}}
+                                     :c3 {:zou/dependencies {:tagged :tag2}}})]
+      (t/is (= sys
+               (c/map->SystemMap {:c1 {}
+                                  :c2 {}
+                                  :c3 {}
+                                  :tag1 {}
+                                  :tag2 {}})))
+      (t/is (= (c/dependencies (:c2 sys))
+               {:tagged :tag1}))
+      (t/is (= (c/dependencies (:c3 sys))
+               {:tagged :tag2}))
+      (t/is (= (c/dependencies (:tag1 sys))
+               {:c1 :c1}))
+      (t/is (= (c/dependencies (:tag2 sys))
+               {:c1' :c1})))))
 
 (t/deftest subsystem-test
-  (fact "extract-subsystem-conf"
-    (let [conf {:c1 {:a                :a
-                     :zou/dependencies {:c2' :c2}}
-                :c2 {:a                :a
-                     :zou/dependencies {:c3' :c3}}
-                :c3 {:a :a}}]
-      (set (keys (#'sut/extract-subsystem-conf conf [:c3]))) => #{:c3}
-      (set (keys (#'sut/extract-subsystem-conf conf [:c2]))) => #{:c2 :c3}
-      (set (keys (#'sut/extract-subsystem-conf conf [:c1]))) => #{:c1 :c2 :c3})))
+  (let [conf {:c1 {:a                :a
+                   :zou/dependencies {:c2' :c2}}
+              :c2 {:a                :a
+                   :zou/dependencies {:c3' :c3}}
+              :c3 {:a :a}}]
+    (t/is (= (set (keys (#'sut/extract-subsystem-conf conf [:c3])))
+             #{:c3}))
+    (t/is (= (set (keys (#'sut/extract-subsystem-conf conf [:c2])))
+             #{:c2 :c3}))
+    (t/is (= (set (keys (#'sut/extract-subsystem-conf conf [:c1])))
+             #{:c1 :c2 :c3}))))
+
+(t/deftest with-component-test
+  (let [c (new-stateful-component {})]
+    ;; returns started component (c')
+    (t/is (= (:started (sut/with-component [c' c] c'))
+             true))
+
+    ;; ensure the component has been stopped
+    (t/is (= @(:state c) [:started :stopped]))
+
+    (reset! (:state c) [])
+    (t/is (thrown? Error
+                   (sut/with-component [c' c]
+                     (throw (Error. "error")))))
+    (t/is (= @(:state c) [:started :stopped]))))
 
 (t/deftest utils-test
-  (fact "with-component"
-    (sut/with-component [c (->FooComponent)] c) => ..foo'..
-    (provided
-     (->FooComponent) => ..foo..
-     (sut/start ..foo..) => ..foo'..
-     (sut/stop ..foo'..) => ..foo''..))
+  (t/testing "whole system"
+    (let [s (sut/with-system [s {:a {:zou/constructor new-stateful-component}}] s)]
+      (t/is (= (get-in s [:a :started])
+               true))
+      (t/is (= @(get-in s [:a :state]) [:started :stopped]))))
 
-  (fact "with-component w/ error"
-    (sut/with-component [c (->FooComponent)]
-      (throw (Error. "error")))
-    =>
-    (throws "error")
-    (provided
-     (->FooComponent) => ..foo..
-     (sut/start ..foo..) => ..foo'..
-     (sut/stop ..foo'..) => ..foo''..))
-
-  (fact "with-system"
-    (sut/with-system [s ..conf..] s) => ..sys'..
-    (provided
-     (sut/build-system-map ..conf..) => ..sys..
-     (sut/start ..sys..) => ..sys'..
-     (sut/stop ..sys'..) => ..sys''..))
-
-  (fact "with-system w/ subsystem keys"
-    (sut/with-system [s ..conf.. :a :b] s) => ..sys'..
-    (provided
-     (sut/build-system-map ..conf.. [:a :b]) => ..sys..
-     (sut/start ..sys..) => ..sys'..
-     (sut/stop ..sys'..) => ..sys''..)))
+  (t/testing "extracted sub system"
+    (let [s (sut/with-system [s {:a {:zou/constructor new-stateful-component}
+                                 :b {:zou/constructor new-stateful-component}
+                                 :c {:zou/constructor new-stateful-component
+                                     :zou/dependencies {:a :a}}}
+                              :c] s)]
+      (t/is (= (set (keys s)) #{:a :c})))))
