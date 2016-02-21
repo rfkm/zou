@@ -2,16 +2,18 @@
   (:require [clojure.set :as set]
             [com.stuartsierra.component :as component]
             [com.stuartsierra.dependency :as dep]
-            [zou.logging :as log]
-            [zou.specter :as s]
+            [zou.logging :as log :include-macros true]
             [zou.util :as u]
-            [zou.util.namespace :as un]))
+            [zou.util.namespace :as un :include-macros true])
+  #?(:clj (:import (clojure.lang ExceptionInfo))))
 
-(un/import-ns com.stuartsierra.component)
+#?(:clj (un/import-ns com.stuartsierra.component #{dependency-graph})
+   :cljs (un/cljs-import-ns com.stuartsierra.component #{dependency-graph}))
 
 (defn- system-tags [conf]
-  (->> conf
-       (s/select [s/ALL (s/collect-one s/FIRST) s/LAST :zou/tags s/ALL])
+  (->> (for [[k cmp] conf
+             tag (:zou/tags cmp)]
+         [k tag])
        (reduce (fn [acc [c t]]
                  (let [[t a] (if (vector? t) t [t c])]
                    (assoc-in acc [t a] c))) {})))
@@ -19,9 +21,12 @@
 (defn- extract-ctor-def [conf-entry]
   (if-let [ctor (and (map? conf-entry)
                      (:zou/constructor conf-entry))]
-    (if (symbol? ctor)
-      (un/resolve-var ctor)
-      ctor)
+    (cond
+      #?@(:clj [(symbol? ctor) (un/resolve-var ctor)])
+      (fn? ctor) ctor
+      :else (throw (ex-info #?(:clj "Constructor must be a function or resoluble symbol"
+                               :cljs "Constructor must be a function")
+                            {:ctor ctor})))
     ;; default ctor
     identity))
 
@@ -40,20 +45,26 @@
                 (system-tags conf)))))
 
 (defn- translate-dependants [conf]
-  (->> conf
-       (s/select [s/ALL (s/collect-one s/FIRST) s/LAST :zou/dependants s/ALL])
+  (->> (for [[k cmp] conf
+             d (:zou/dependants cmp)]
+         [k d])
        (reduce (fn [acc [comp-key [target alias]]]
                  (assoc-in acc [target :zou/dependencies alias] comp-key))
                conf)
-       (s/transform [s/ALL s/LAST] #(if (map? %) (dissoc % :zou/dependants) %))))
+       (u/map-vals #(if (map? %) (dissoc % :zou/dependants) %))))
 
 (defn- translate-optionals [conf]
-  (->> conf
-       (s/transform [s/ALL s/LAST map?
-                     (s/collect-one :zou/optionals) (s/view #(dissoc % :zou/optionals))
-                     :zou/dependencies]
-                    (fn [optionals deps]
-                      (merge deps (or (u/filter-vals #(contains? conf %) optionals) {}))))))
+  (u/map-vals (fn [cmp]
+                (if (map? cmp)
+                  (let [opts (:zou/optionals cmp)
+                        deps (:zou/dependencies cmp)]
+                    (-> cmp
+                        (dissoc :zou/optionals)
+                        (assoc :zou/dependencies
+                               (merge deps
+                                      (or (u/filter-vals #(contains? conf %) opts)
+                                          {})))))
+                  cmp)) conf))
 
 (defn- system-deps [conf]
   (->> conf
@@ -117,12 +128,12 @@
 (defmacro try-recovery [& body]
   `(try
      ~@body
-     (catch clojure.lang.ExceptionInfo e#
+     (catch ExceptionInfo e#
        (log/warn "Failed to start system")
        (log/warn "Trying to gracefully stop corrupted system...")
        (try (stop (:system (ex-data e#)))
             (log/warn "...succeeded")
-            (catch Throwable e'#
+            (catch #?(:clj Throwable :cljs :default) e'#
               (log/warn (ex-without-components e'#) "...failed")))
        (throw (ex-without-components e#)))))
 

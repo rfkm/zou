@@ -1,7 +1,8 @@
 (ns zou.component-test
-  (:require [clojure.test :as t]
-            [com.stuartsierra.component :as c]
-            [zou.component :as sut]))
+  (:require [com.stuartsierra.component :as c]
+            [zou.component :as sut :include-macros true]
+            #?(:clj [clojure.test :as t]
+               :cljs [cljs.test :as t :include-macros true])))
 
 (defrecord FooComponent [])
 (defrecord StatefulComponent [state]
@@ -24,8 +25,13 @@
               :b identity})))
 
   (t/testing "resolving"
-    (t/is (= (#'sut/system-ctors {:a {:zou/constructor 'identity}})
-             {:a #'identity}))))
+    #?(:clj
+       (t/is (= (#'sut/system-ctors {:a {:zou/constructor 'identity}})
+                {:a #'identity}))
+
+       :cljs
+       ;; Resolving feature doesn't support CLJS
+       (t/is (thrown? ExceptionInfo (#'sut/system-ctors {:a {:zou/constructor 'identity}}))))))
 
 (t/deftest deps-test
   (t/is
@@ -151,9 +157,10 @@
     (t/is (= @(:state c) [:started :stopped]))
 
     (reset! (:state c) [])
-    (t/is (thrown? Error
+    (t/is (thrown? #?(:clj clojure.lang.ExceptionInfo
+                      :cljs ExceptionInfo)
                    (sut/with-component [c' c]
-                     (throw (Error. "error")))))
+                     (throw (ex-info "error" {})))))
     (t/is (= @(:state c) [:started :stopped]))))
 
 (t/deftest utils-test

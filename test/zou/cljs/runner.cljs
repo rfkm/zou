@@ -1,11 +1,13 @@
 (ns zou.cljs.runner
   (:require [doo.runner :refer-macros [doo-tests]]
+            zou.component-test
             zou.specter-test
             zou.util.namespace-test
             zou.util.platform-test
             zou.util-test))
 
-(doo-tests 'zou.specter-test
+(doo-tests 'zou.component-test
+           'zou.specter-test
            'zou.util.namespace-test
            'zou.util.platform-test
            'zou.util-test)
