@@ -2,7 +2,8 @@
   (:require [com.stuartsierra.component :as c]
             [zou.component :as sut :include-macros true]
             #?(:clj [clojure.test :as t]
-               :cljs [cljs.test :as t :include-macros true])))
+               :cljs [cljs.test :as t :include-macros true]))
+  #?(:clj (:import (clojure.lang ExceptionInfo))))
 
 (defrecord FooComponent [])
 (defrecord StatefulComponent [state]
@@ -13,6 +14,13 @@
   (stop [this]
     (swap! state conj :stopped)
     (assoc this :stopped true)))
+
+(defrecord BrokenComponent []
+  c/Lifecycle
+  (start [this]
+    (throw (ex-info "error" {:this this})))
+  (stop [this]
+    this))
 
 (defn new-stateful-component [_]
   (->StatefulComponent (atom [])))
@@ -157,13 +165,12 @@
     (t/is (= @(:state c) [:started :stopped]))
 
     (reset! (:state c) [])
-    (t/is (thrown? #?(:clj clojure.lang.ExceptionInfo
-                      :cljs ExceptionInfo)
+    (t/is (thrown? ExceptionInfo
                    (sut/with-component [c' c]
                      (throw (ex-info "error" {})))))
     (t/is (= @(:state c) [:started :stopped]))))
 
-(t/deftest utils-test
+(t/deftest with-system-test
   (t/testing "whole system"
     (let [s (sut/with-system [s {:a {:zou/constructor new-stateful-component}}] s)]
       (t/is (= (get-in s [:a :started])
@@ -177,3 +184,15 @@
                                      :zou/dependencies {:a :a}}}
                               :c] s)]
       (t/is (= (set (keys s)) #{:a :c})))))
+
+(t/deftest try-recovery-test
+  (let [sys (c/map->SystemMap {:broken (->BrokenComponent)
+                               :dep (new-stateful-component {})})
+        sys (c/system-using sys
+                            {:broken {:dep :dep}})]
+    (try
+      (sut/try-recovery
+       (c/start sys))
+      (catch ExceptionInfo e
+        ;; Ensure `dep` is stopped
+        (t/is (= (-> sys :dep :state deref set) #{:started :stopped}))))))

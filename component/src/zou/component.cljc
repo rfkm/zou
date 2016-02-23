@@ -4,8 +4,7 @@
             [com.stuartsierra.dependency :as dep]
             [zou.logging :as log :include-macros true]
             [zou.util :as u]
-            [zou.util.namespace :as un :include-macros true])
-  #?(:clj (:import (clojure.lang ExceptionInfo))))
+            [zou.util.namespace :as un :include-macros true]))
 
 #?(:clj (un/import-ns com.stuartsierra.component #{dependency-graph})
    :cljs (un/cljs-import-ns com.stuartsierra.component #{dependency-graph}))
@@ -125,17 +124,25 @@
      (-> (component/map->SystemMap sys-map)
          (component/system-using deps)))))
 
+(defn try-catch-all [try-fn catch-fn]
+  (try
+    (try-fn)
+    (catch #?(:cljs :default :clj Throwable) e
+      (catch-fn e))))
+
 (defmacro try-recovery [& body]
-  `(try
-     ~@body
-     (catch ExceptionInfo e#
-       (log/warn "Failed to start system")
-       (log/warn "Trying to gracefully stop corrupted system...")
-       (try (stop (:system (ex-data e#)))
-            (log/warn "...succeeded")
-            (catch #?(:clj Throwable :cljs :default) e'#
-              (log/warn (ex-without-components e'#) "...failed")))
-       (throw (ex-without-components e#)))))
+  `(try-catch-all
+    (fn [] ~@body)
+    (fn [e#]
+      (log/warn "Failed to start system")
+      (log/warn "Trying to gracefully stop corrupted system...")
+      (try-catch-all
+       (fn []
+         (stop (:system (ex-data e#)))
+         (log/warn "...succeeded"))
+       (fn [e'#]
+         (log/warn (ex-without-components e'#) "...failed")))
+      (throw (ex-without-components e#)))))
 
 (defmacro with-component
   [[s component] & body]
