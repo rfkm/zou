@@ -98,9 +98,6 @@
       {:c1   {}
        :tag1 {:zou/dependencies {:c1 :c1} :a :b}})))
 
-(= (map->FooComponent {:b :b})
-   (map->FooComponent {:b :b}))
-
 (t/deftest build-system-map-test
   (t/testing "dependencies+dependants"
     (let [sys (sut/build-system-map {:c1 {:a :a}
@@ -141,6 +138,20 @@
                {:c1 :c1}))
       (t/is (= (c/dependencies (:tag2 sys))
                {:c1' :c1})))))
+
+(t/deftest flatten-nested-system-map-test
+  (t/is
+   (= (#'sut/flatten-nested-system-map {:a {:a {:zou/dependencies {:ab :b :bb :b/b}}
+                                            :b {:zou/dependants {:a :b :b/a :b}}}
+                                        :b {:a {:zou/tags [:tag1 [:tag2 :ba]]}
+                                            :b {:zou/optionals {:ba :a :aa :a/a}}
+                                            :c true ; invalid component spec, but doesn't care here
+                                            }})
+      {:a/a {:zou/dependencies {:ab :a/b :bb :b/b}}
+       :a/b {:zou/dependants {:a/a :b :b/a :b}}
+       :b/a {:zou/tags [:b/tag1 [:b/tag2 :ba]]}
+       :b/b {:zou/optionals {:ba :b/a :aa :a/a}}
+       :b/c true})))
 
 (t/deftest subsystem-test
   (let [conf {:c1 {:a                :a

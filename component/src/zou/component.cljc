@@ -124,6 +124,43 @@
      (-> (component/map->SystemMap sys-map)
          (component/system-using deps)))))
 
+(defn- munge-system-key [system-key]
+  (if-let [ns (namespace system-key)]
+    (keyword (str ns \. (name system-key)))
+    system-key))
+
+(defn- qualify-component-key [system-key component-key]
+  (if (namespace component-key)
+    component-key                       ; already qualified
+    (keyword (name (munge-system-key system-key))
+             (name component-key))))
+
+(defn- qualify-component-spec [system-key spec]
+  (let [qualify (partial qualify-component-key system-key)]
+    (-> spec
+        (u/update-in-when [:zou/dependencies] (partial u/map-vals qualify))
+        (u/update-in-when [:zou/optionals] (partial u/map-vals qualify))
+        (u/update-in-when [:zou/dependants] (partial u/map-keys qualify))
+        (u/update-in-when [:zou/tags] (partial mapv #(cond
+                                                       (keyword? %) (qualify %)
+                                                       (vector? %)  (update % 0 qualify)
+                                                       :else        %))))))
+
+(defn flatten-nested-system-map [conf]
+  {:pre [(and (map? conf) (every? map? (map last conf)))]}
+  (into
+   {}
+   (for [[sys-key sys] conf
+         [cmp-key cmp] sys]
+     [(qualify-component-key sys-key cmp-key)
+      (qualify-component-spec sys-key cmp)])))
+
+(defn build-nested-system-map
+  ([conf]
+   (build-system-map (flatten-nested-system-map conf)))
+  ([conf subsystem-keys]
+   (build-system-map (flatten-nested-system-map conf) subsystem-keys)))
+
 (defn try-catch-all [try-fn catch-fn]
   (try
     (try-fn)
@@ -157,4 +194,11 @@
   `(with-component [~s (if (seq ~(vec subsystem-keys))
                          (build-system-map ~conf ~(vec subsystem-keys))
                          (build-system-map ~conf))]
+     ~@body))
+
+(defmacro with-nested-system
+  [[s conf & subsystem-keys] & body]
+  `(with-component [~s (if (seq ~(vec subsystem-keys))
+                         (build-nested-system-map ~conf ~(vec subsystem-keys))
+                         (build-nested-system-map ~conf))]
      ~@body))
