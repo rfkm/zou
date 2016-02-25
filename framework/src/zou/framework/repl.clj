@@ -10,9 +10,8 @@
 (defn go []
   (inject-util-to-core)
   (core/boot-core!)
-  (core/load-systems (core/core) (conf/fetch-config-or-abort))
-  (doseq [k (keys (core/systems (core/core)))]
-    (core/start-system (core/core) k)))
+  (core/load-system (core/core) (conf/fetch-config-or-abort))
+  (core/start-systems (core/core)))
 
 (defn stop []
   (core/shutdown-core!))
@@ -26,7 +25,7 @@
   (tnr/refresh :after 'zou.framework.repl/go))
 
 (defn system [& ks]
-  (get-in (core/systems (core/core)) ks))
+  (get-in (core/system (core/core)) ks))
 
 (def $ #'system)
 

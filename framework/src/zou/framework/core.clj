@@ -10,6 +10,7 @@
             [zou.util.repl :as ur]))
 
 (def ^:private bootstrap-config-path "zou/config/bootstrap.edn")
+(def ^:private main-system-key :main)
 
 (defonce ^:private core-system nil)
 
@@ -37,8 +38,11 @@
 (def system-path
   (s/comp-paths systems-path s/keypath))
 
-(defn system [core system-key]
-  (s/select-one (system-path system-key) core))
+(defn system
+  ([core]
+   (system core main-system-key))
+  ([core system-key]
+   (s/select-one (system-path system-key) core)))
 
 (defn systems
   ([]
@@ -55,18 +59,28 @@
 (defn start-system [core system-key]
   (s/transform (system-path system-key) #(c/try-recovery (c/start %)) core))
 
+(defn start-systems [core]
+  (doseq [k (keys (systems core))]
+    (start-system core k)))
+
 (defn stop-system [core system-key]
   (s/transform (system-path system-key) c/stop core))
+
+(defn stop-systems [core]
+  (doseq [k (keys (systems core))]
+    (stop-system core k)))
 
 (defn remove-system [core system-key]
   (s/transform systems-path #(dissoc % system-key) core))
 
-(defn load-systems [core conf-map-or-source]
-  (->> conf-map-or-source
-       (u/?>> (not (map? conf-map-or-source)) (conf/read-config))
-       (u/filter-vals map?)
-       (u/map-vals c/build-system-map)
-       (add-systems core)))
+(defn load-system
+  ([core conf-map-or-source]
+   (load-system core conf-map-or-source main-system-key))
+  ([core conf-map-or-source system-key]
+   (->> conf-map-or-source
+        (u/?>> (not (map? conf-map-or-source)) (conf/read-config))
+        c/build-nested-system-map
+        (add-system core system-key))))
 
 (defn make-core-from-conf [conf]
   (c/build-system-map (read-bootstrap-config)))

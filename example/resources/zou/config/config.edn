@@ -21,7 +21,7 @@
 
         ;; :another-routes
         ;; {:zou/constructor zou.web.routing.route-provider/map->SimpleRouteProvider
-        ;;  :zou/tags        [:tag/route-provider]
+        ;;  :zou/tags        [:tag.route-provider]
         ;;  :spec            ["/foo" {"" :hello-world
         ;;                            ["greet/" :people] :greet}]
         ;;  }
@@ -66,15 +66,15 @@
         :view-helper
         {:zou/constructor zou-todo.view-helper/map->ViewHelper
          :zou/dependencies {:router :router}
-         :zou/tags [:tag/view-model]}
+         :zou/tags [:tag.view-model]}
 
         ;; DB
         ;; ---------------------------------------------------------------------
         :hikari-cp
         {
-         ;; Any components tagged with :tag/crago will be injected
+         ;; Any components tagged with :tag.crago will be injected
          ;; into Ring's request map.
-         :zou/tags [[:tag/cargo :db]]
+         :zou/tags [[:tag.cargo :db]]
 
          ;; The complete list of available options is here:
          ;;  https://github.com/tomekw/hikari-cp/

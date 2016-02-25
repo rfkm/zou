@@ -17,9 +17,8 @@
 
 (defn run [conf-source]
   (core/boot-core!)
-  (core/load-systems (core/core) conf-source)
-  (doseq [k (keys (core/systems (core/core)))]
-    (core/start-system (core/core) k)))
+  (core/load-system (core/core) conf-source)
+  (core/start-systems (core/core)))
 
 (cli/defcmd run-cmd
   "Start up the system"

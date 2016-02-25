@@ -16,13 +16,13 @@
       (fact "start"
         (sut/start-system core :key) => core
         (provided
-          (c/start ..sys..) => ..sys'..)
+         (c/start ..sys..) => ..sys'..)
         (sut/system core :key) => ..sys'..)
 
       (fact "stop"
         (sut/stop-system core :key) => core
         (provided
-          (c/stop ..sys'..) => ..sys''..)
+         (c/stop ..sys'..) => ..sys''..)
         (sut/system core :key) => ..sys''..)
 
       (fact "remove"
@@ -33,34 +33,35 @@
         (sut/add-system core :key ..sys..) => core
         (c/stop core) => anything
         (provided
-          ;; should stop subsystems too
-          (c/stop ..sys..) => ..sys'..)))
+         ;; should stop subsystems too
+         (c/stop ..sys..) => ..sys'..)))
 
-    (fact "load-systems"
+    (fact "load-system"
       (fact "config map"
         (let [core (c/start (sut/map->Core {}))]
-          (sut/load-systems core {:a {:a :a}
-                                  :b {:b :b}
-                                  :c false ; ignore
-                                  })
+          (sut/load-system core {:a {:a :a}
+                                 :b {:b :b}
+                                 :c false ; ignore
+                                 })
           =>
           core
           (provided
-            (c/build-system-map {:a :a}) => ..sys-a..
-            (c/build-system-map {:b :b}) => ..sys-b..)
-          (sut/system core :a) => ..sys-a..
-          (sut/system core :b) => ..sys-b..))
+           (c/build-nested-system-map {:a {:a :a}
+                                       :b {:b :b}
+                                       :c false ; ignore
+                                       }) => ..sys..)
+          (sut/system core) => ..sys..))
 
       (fact "config path"
         (let [core (c/start (sut/map->Core {}))]
-          (sut/load-systems core "conf-path")
+          (sut/load-system core "conf-path")
           =>
           core
           (provided
-            (conf/read-config "conf-path") => {:a {:a :a}
-                                               :b {:b :b}
-                                               :c false}
-            (c/build-system-map {:a :a}) => ..sys-a..
-            (c/build-system-map {:b :b}) => ..sys-b..)
-          (sut/system core :a) => ..sys-a..
-          (sut/system core :b) => ..sys-b..)))))
+           (conf/read-config "conf-path") => {:a {:a :a}
+                                              :b {:b :b}
+                                              :c false}
+           (c/build-nested-system-map {:a {:a :a}
+                                       :b {:b :b}
+                                       :c false}) => ..sys..)
+          (sut/system core) => ..sys..)))))

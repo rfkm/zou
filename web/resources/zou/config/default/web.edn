@@ -12,10 +12,10 @@
 
  :router
  {:zou/constructor  zou.web.routing.bidi/map->BidiRouter
-  :zou/dependencies {:route-providers :tag/route-provider
+  :zou/dependencies {:route-providers :tag.route-provider
                      :handler-finder :handler-finder
                      :middlewares :routed-middlewares}
-  :zou/tags         [:tag/cargo :tag/view-model]
+  :zou/tags         [:tag.cargo :tag.view-model]
   :dynamic?         #zou/when-dev true}
 
  :handler-finder
@@ -29,7 +29,7 @@
 
  :routes
  {:zou/constructor zou.web.routing.route-provider/map->SimpleRouteProvider
-  :zou/tags        [:tag/route-provider]
+  :zou/tags        [:tag.route-provider]
   ;; :spec            ["/" {"" :hello-world
   ;;                        ["greet/" :people] :greet}]
   }
@@ -41,21 +41,21 @@
  :view
  {:zou/constructor  zou.web.view.generic/map->GenericView
   :zou/dependencies {:renderable-finder :view-finder}
-  :zou/optionals    {:models :tag/view-model}
-  :zou/tags         [:tag/cargo]
+  :zou/optionals    {:models :tag.view-model}
+  :zou/tags         [:tag.cargo]
   :dynamic?         #zou/when-dev true}
 
  :static-view-model
- {:zou/tags [:tag/view-model]}
+ {:zou/tags [:tag.view-model]}
 
  :assets
  {:zou/constructor zou.web.asset/map->AssetManager
-  :zou/optionals {:asset-providers :tag/asset-provider}
-  :zou/tags [:tag/route-provider :tag/view-model]}
+  :zou/optionals {:asset-providers :tag.asset-provider}
+  :zou/tags [:tag.route-provider :tag.view-model]}
 
  :cljsbuild
  {:zou/constructor zou.web.asset/map->CljsbuildAssetProvider
-  :zou/tags [:tag/asset-provider]
+  :zou/tags [:tag.asset-provider]
   :builds [;; {:id "example",
            ;;  :path "/js/dist/example.js"
            ;;  :source-paths ["src-cljs"]
@@ -70,7 +70,7 @@
 
  :sassc
  {:zou/constructor zou.web.sassc/map->SasscCompiler
-  :zou/tags [:tag/asset-provider]
+  :zou/tags [:tag.asset-provider]
   :builds [ ;; {:src        "src-scss/main.scss"
            ;;  :output-to  "resources/public/css/dist/test.css"
            ;;  :style      "compressed"
@@ -88,7 +88,7 @@
  ;; -----------
  :middlewares
  {:zou/constructor zou.web.middleware.aggregator/map->MiddlewareAggregator
-  :zou/optionals {:middlewares :tag/middleware}
+  :zou/optionals {:middlewares :tag.middleware}
   :inject-context-updater? true
   ;; :configurator #resolve zou.web.middleware/configurator
   :dependency-map {:prone {:stacktrace-web :after
@@ -108,7 +108,7 @@
 
  :routed-middlewares
  {:zou/constructor zou.web.middleware.aggregator/map->MiddlewareAggregator
-  :zou/optionals {:middlewares :tag/routed-middleware}
+  :zou/optionals {:middlewares :tag.routed-middleware}
   ;; :configurator #resolve zou.web.middleware/configurator
   :dependency-map {}}
 
@@ -118,35 +118,35 @@
 
  :prone
  {:zou/constructor zou.web.middleware/prone
-  :zou/tags [:tag/middleware]
+  :zou/tags [:tag.middleware]
   :zou/disabled #zou/when-prod true
   :app-namespaces [zou]}
 
  :stacktrace-web
  {:zou/constructor zou.web.middleware/stacktrace-web
   :zou/disabled #zou/when-prod true
-  :zou/tags [:tag/middleware]}
+  :zou/tags [:tag.middleware]}
 
  :stacktrace-log
  {:zou/constructor zou.web.middleware/stacktrace-log
-  :zou/tags [:tag/middleware]}
+  :zou/tags [:tag.middleware]}
 
  :error-handler
  {:zou/constructor zou.web.middleware/error-handler
-  :zou/tags [:tag/middleware]
+  :zou/tags [:tag.middleware]
   :zou/dependencies {:request-context :request-context}}
 
  :response-exception-handler
  {:zou/constructor zou.web.middleware/response-exception-handler
-  :zou/tags [:tag/middleware]}
+  :zou/tags [:tag.middleware]}
 
  :pseudo-method
  {:zou/constructor zou.web.middleware/pseudo-method
-  :zou/tags [:tag/middleware]}
+  :zou/tags [:tag.middleware]}
 
  :ring-defaults
  {:zou/constructor zou.web.middleware/defaults
-  :zou/tags        [:tag/middleware]
+  :zou/tags        [:tag.middleware]
 
   ;; site defaults
   :params          {:urlencoded true
@@ -169,28 +169,28 @@
  :nrepl-out-bridge
  {:zou/constructor zou.web.middleware/nrepl-out-bridge
   :zou/disabled #zou/when-prod true
-  :zou/tags [:tag/middleware]}
+  :zou/tags [:tag.middleware]}
 
  :routing-middleware
  {:zou/constructor zou.web.routing/map->RoutingMiddleware
-  :zou/tags [:tag/middleware]
+  :zou/tags [:tag.middleware]
   :zou/dependencies {:router :router}}
 
  :reload-middleware
  {:zou/constructor zou.web.middleware/reload
   :zou/disabled #zou/when-prod true
-  :zou/tags [:tag/middleware]}
+  :zou/tags [:tag.middleware]}
 
  :webjars
  {:zou/constructor zou.web.middleware/webjars
-  :zou/tags [:tag/middleware]
+  :zou/tags [:tag.middleware]
   :prefix "assets"}
 
  :container
  {:zou/constructor zou.web.middleware.container/map->Container
-  :zou/tags [:tag/middleware]
-  :zou/optionals {:cargos :tag/cargo}}
+  :zou/tags [:tag.middleware]
+  :zou/optionals {:cargos :tag.cargo}}
 
  :args-mapper
  {:zou/constructor zou.web.handler/args-mapper
-  :zou/tags [:tag/routed-middleware]}}
+  :zou/tags [:tag.routed-middleware]}}
