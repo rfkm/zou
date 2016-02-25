@@ -14,7 +14,11 @@
              tag (:zou/tags cmp)]
          [k tag])
        (reduce (fn [acc [c t]]
-                 (let [[t a] (if (vector? t) t [t c])]
+                 (let [[t a] (if (vector? t)
+                               t
+                               [t
+                                ;; Use the component name (without ns prefix) as an alias
+                                (keyword (name c))])]
                    (assoc-in acc [t a] c))) {})))
 
 (defn- extract-ctor-def [conf-entry]

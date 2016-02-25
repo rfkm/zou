@@ -98,6 +98,13 @@
       {:c1   {}
        :tag1 {:zou/dependencies {:c1 :c1} :a :b}})))
 
+(t/deftest tags-with-scope-test
+  (t/is
+   (= (#'sut/translate-tags {:scope/c1 {:zou/tags [:scope/tag1 [:scope/tag2 :c1']] :a :b}})
+      {:scope/c1   {:a :b}
+       :scope/tag1 {:zou/dependencies {:c1 :scope/c1}}
+       :scope/tag2 {:zou/dependencies {:c1' :scope/c1}}})))
+
 (t/deftest build-system-map-test
   (t/testing "dependencies+dependants"
     (let [sys (sut/build-system-map {:c1 {:a :a}
