@@ -82,8 +82,8 @@
         c/build-nested-system-map
         (add-system core system-key))))
 
-(defn make-core-from-conf [conf]
-  (c/build-system-map (read-bootstrap-config)))
+(defn make-core-from-conf [bootstrap-conf]
+  (c/build-system-map bootstrap-conf))
 
 (defn boot-core!
   ([] (boot-core! (read-bootstrap-config)))
