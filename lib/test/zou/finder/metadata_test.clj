@@ -1,20 +1,20 @@
-(ns zou.web.finder.metadata-test
+(ns zou.finder.metadata-test
   (:require [clojure.test :as t]
             [midje.sweet :refer :all]
             [zou.component :as c]
             [zou.logging :as log]
             [zou.util.namespace :as un]
-            [zou.web.finder.metadata :as sut]
-            [zou.web.finder.proto :as proto]))
+            [zou.finder.metadata :as sut]
+            [zou.finder.proto :as proto]))
 
 (defn ^{::tag :foo} foo [])
 
 (t/deftest component-test
   (fact
-    (c/with-component [r (sut/map->MetadataBasedFinder {:dynamic? true :var-tag ::tag})]
-      (proto/find r identity) => identity
-      (proto/find r :foo) => (exactly foo)
-      (proto/find r :invalid) => nil))
+      (c/with-component [r (sut/map->MetadataBasedFinder {:dynamic? true :var-tag ::tag})]
+        (proto/find r identity) => identity
+        (proto/find r :foo) => (exactly foo)
+        (proto/find r :invalid) => nil))
 
   (fact "w/ ns-tag"
     (c/with-component [r (sut/map->MetadataBasedFinder {:dynamic? true :var-tag :my/handler-var :ns-tag :my/handler-ns})]

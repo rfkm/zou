@@ -5,7 +5,7 @@
             [ring.util.request :as req]
             [zou.component :as c]
             [zou.util :as u]
-            [zou.web.finder.proto :as fproto]
+            [zou.finder.proto :as fproto]
             [zou.web.middleware.proto :as mproto]
             [zou.web.routing.proto :as proto]))
 

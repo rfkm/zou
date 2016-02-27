@@ -1,7 +1,7 @@
 (ns zou.web.view.selmer
   (:require [selmer.parser :as s]
             [zou.component :as c]
-            [zou.web.finder.proto :as fproto]))
+            [zou.finder.proto :as fproto]))
 
 ;; TODO: support other options
 (defrecord SelmerFinder [cache? models base-path]

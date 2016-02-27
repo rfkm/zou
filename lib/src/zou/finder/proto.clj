@@ -1,4 +1,4 @@
-(ns zou.web.finder.proto
+(ns zou.finder.proto
   (:refer-clojure :exclude [find]))
 
 (defprotocol Finder

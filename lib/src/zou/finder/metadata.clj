@@ -1,8 +1,8 @@
-(ns zou.web.finder.metadata
+(ns zou.finder.metadata
   (:require [zou.component :as c]
             [zou.logging :as log]
             [zou.util.namespace :as un]
-            [zou.web.finder.proto :as proto]))
+            [zou.finder.proto :as proto]))
 
 (defn- collect-vars [var-tag ns-tag]
   (if ns-tag

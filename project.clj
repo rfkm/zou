@@ -1,4 +1,4 @@
-(def modules ["common" "component" "framework" "web" "db" "cljs-devel" "devel"])
+(def modules ["common" "component" "lib" "framework" "web" "db" "cljs-devel" "devel"])
 (def modules+tpl (conj modules "lein-template"))
 (def modules+tpl+parent (conj modules+tpl "."))
 
@@ -7,6 +7,7 @@
 
 (defproject zou "0.1.0-alpha3-SNAPSHOT"
   :dependencies [[zou/common :version]
+                 [zou/lib :version]
                  [zou/framework :version]
                  [zou/web :version]
                  [zou/db :version]]

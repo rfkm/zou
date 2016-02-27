@@ -19,9 +19,9 @@
   :dynamic?         #zou/when-dev true}
 
  :handler-finder
- {:zou/constructor zou.web.finder.rule/map->RuleBasedFinder
+ {:zou/constructor zou.finder.rule/map->RuleBasedFinder
   :mappings        {}
-  ;; :zou/constructor zou.web.finder.metadata/map->MetadataBasedFinder
+  ;; :zou/constructor zou.finder.metadata/map->MetadataBasedFinder
   ;; :dynamic?        true
   ;; :var-tag         :zou/handler
   ;; :ns-tag          :zou/handler-ns
@@ -35,7 +35,7 @@
   }
 
  :view-finder
- {:zou/constructor zou.web.finder.rule/map->RuleBasedFinder
+ {:zou/constructor zou.finder.rule/map->RuleBasedFinder
   :mappings {}}
 
  :view

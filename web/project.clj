@@ -1,6 +1,7 @@
 (defproject zou/web "0.1.0-alpha3-SNAPSHOT"
   :dependencies [[zou/common :version]
                  [zou/component :version]
+                 [zou/lib :version]
                  [org.immutant/web "2.1.2"]
                  [ring/ring-core "1.4.0"]
                  [ring/ring-defaults "0.1.5"]

@@ -2,7 +2,7 @@
   (:require [clojure.test :as t]
             [midje.sweet :refer :all]
             [zou.component :as c]
-            [zou.web.finder.proto :as fproto]
+            [zou.finder.proto :as fproto]
             [zou.web.view.generic :as sut]
             [zou.web.view.proto :as vproto]))
 

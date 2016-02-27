@@ -1,9 +1,9 @@
-(ns zou.web.finder.rule-test
+(ns zou.finder.rule-test
   (:require [clojure.test :as t]
             [midje.sweet :refer :all]
             [zou.component :as c]
-            [zou.web.finder.proto :as proto]
-            [zou.web.finder.rule :as sut]))
+            [zou.finder.proto :as proto]
+            [zou.finder.rule :as sut]))
 
 (def test-var)
 
@@ -22,9 +22,9 @@
 
   (fact "kw->var"
     (sut/kw->var ::test-var {}) => #'test-var
-    (sut/kw->var :foo/test-var {:foo :zou.web.finder.rule-test}) => #'test-var))
+    (sut/kw->var :foo/test-var {:foo :zou.finder.rule-test}) => #'test-var))
 
 (t/deftest component-test
   (fact
-    (c/with-component [c (sut/->RuleBasedFinder {:foo :zou.web.finder.rule-test})]
-      (proto/find c :foo/test-var) => #'test-var)))
+      (c/with-component [c (sut/->RuleBasedFinder {:foo :zou.finder.rule-test})]
+        (proto/find c :foo/test-var) => #'test-var)))

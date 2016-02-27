@@ -3,7 +3,7 @@
             [stencil.core :as s]
             [stencil.loader :as sl]
             [zou.component :as c]
-            [zou.web.finder.proto :as fproto]))
+            [zou.finder.proto :as fproto]))
 
 (defrecord StencilFinder [ttl base-path]
   c/Lifecycle

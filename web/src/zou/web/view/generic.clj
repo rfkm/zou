@@ -1,6 +1,6 @@
 (ns zou.web.view.generic
   (:require [zou.component :as c]
-            [zou.web.finder.proto :as fproto]
+            [zou.finder.proto :as fproto]
             [zou.web.view.proto :as proto]
             [zou.web.view.util :as vu]))
 

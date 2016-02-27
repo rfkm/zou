@@ -1,7 +1,7 @@
-(ns zou.web.finder.rule
+(ns zou.finder.rule
   (:require [zou.component :as c]
             [zou.util.namespace :as un]
-            [zou.web.finder.proto :as proto]))
+            [zou.finder.proto :as proto]))
 
 (defn expand-kw [kw mapping-conf]
   (let [root (get mapping-conf nil)
