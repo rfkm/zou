@@ -1,7 +1,7 @@
 (ns zou.framework.repl
   (:refer-clojure :exclude [$])
   (:require [clojure.tools.namespace.repl :as tnr]
-            [zou.framework.config :as conf]
+            [zou.framework.container :as container]
             [zou.framework.core :as core]
             [zou.util.namespace :as ns]))
 
@@ -9,9 +9,7 @@
 
 (defn go []
   (inject-util-to-core)
-  (core/boot-core!)
-  (core/load-system (core/core) (conf/fetch-config-or-abort))
-  (core/start-systems (core/core)))
+  (core/run-core (core/boot-core!)))
 
 (defn stop []
   (core/shutdown-core!))
@@ -24,8 +22,12 @@
   (stop)
   (tnr/refresh :after 'zou.framework.repl/go))
 
+(defn system* [system-key & ks]
+  (get-in (container/system (:container (core/core-system)) system-key) ks))
+
 (defn system [& ks]
-  (get-in (core/system (core/core)) ks))
+  ;; Assuming the system key is `:main`
+  (apply system* :main ks))
 
 (def $ #'system)
 
@@ -33,4 +35,4 @@
   (ns/inject clojure.core $))
 
 (defn systems []
-  (core/systems (core/core)))
+  (container/systems (:container (core/core-system))))

@@ -10,4 +10,5 @@
  :app {$include #- base}
  :app2 {$include #- base
         :counter {:step 100}
-        :timer {:interval 3000}}}
+        :timer {:interval 3000}
+        :task {:zou/constructor zou.test-task/map->MyTask}}}

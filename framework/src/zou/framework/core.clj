@@ -1,106 +1,56 @@
 (ns zou.framework.core
-  (:require [clojure.java.io :as io]
+  (:require [schema.core :as s]
             [zou.component :as c]
             [zou.framework.config :as conf]
-            [zou.framework.ext :as ext]
-            [zou.logging :as log]
-            [zou.specter :as s]
-            [zou.util :as u]
-            [zou.util.namespace :as ns]
-            [zou.util.repl :as ur]))
+            [zou.framework.entrypoint.proto :as ep]
+            [zou.logging :as log]))
 
-(def ^:private bootstrap-config-path "zou/config/bootstrap.edn")
-(def ^:private main-system-key :main)
+(defonce ^:private +core-system+ nil)
 
-(defonce ^:private core-system nil)
-
-(defn core []
-  (:core core-system))
-
-(defn read-bootstrap-config []
-  (conf/read-config (io/resource bootstrap-config-path)))
-
-(declare systems)
-
-(defrecord Core []
+(s/defrecord CoreSystem [entrypoint :- (s/protocol ep/EntryPoint)]
+  {s/Keyword s/Any}
   c/Lifecycle
   (start [this]
-    (assoc this :systems (atom {})))
+    (s/validate CoreSystem this)
+    (c/start-system this))
   (stop [this]
-    (doseq [[k s] (systems this)]
-      (log/infof "Stopping a system: %s" k)
-      (c/stop s))
-    this))
+    (c/stop-system this))
+  ep/EntryPoint
+  (run [this args]
+    (ep/run entrypoint args)))
 
-(def systems-path
-  (s/comp-paths :systems some? s/atom-path))
-
-(def system-path
-  (s/comp-paths systems-path s/keypath))
-
-(defn system
-  ([core]
-   (system core main-system-key))
-  ([core system-key]
-   (s/select-one (system-path system-key) core)))
-
-(defn systems
-  ([]
-   (systems (core)))
-  ([core]
-   (s/select-one systems-path core)))
-
-(defn add-system [core system-key system]
-  (s/setval (system-path system-key) system core))
-
-(defn add-systems [core systems]
-  (reduce-kv add-system core systems))
-
-(defn start-system [core system-key]
-  (s/transform (system-path system-key) #(c/try-recovery (c/start %)) core))
-
-(defn start-systems [core]
-  (doseq [k (keys (systems core))]
-    (start-system core k)))
-
-(defn stop-system [core system-key]
-  (s/transform (system-path system-key) c/stop core))
-
-(defn stop-systems [core]
-  (doseq [k (keys (systems core))]
-    (stop-system core k)))
-
-(defn remove-system [core system-key]
-  (s/transform systems-path #(dissoc % system-key) core))
-
-(defn load-system
-  ([core conf-map-or-source]
-   (load-system core conf-map-or-source main-system-key))
-  ([core conf-map-or-source system-key]
-   (->> conf-map-or-source
-        (u/?>> (not (map? conf-map-or-source)) (conf/read-config))
-        c/build-nested-system-map
-        (add-system core system-key))))
-
-(defn make-core-from-conf [bootstrap-conf]
-  (c/build-system-map bootstrap-conf))
+(defn make-core
+  "Create an instance of CoreSystem with the given config map."
+  [conf]
+  (map->CoreSystem (c/build-system-map conf)))
 
 (defn boot-core!
-  ([] (boot-core! (read-bootstrap-config)))
-  ([conf] (boot-core! #'core-system conf))
+  "Create an instance of CoreSystem with the given config map, and
+  start its life cycle. If the config map is not specified, it will be
+  fetched via `zou.framework.config/fetch-config-or-abort`.
+
+  Also, the started instance will be bound to the given var. If the
+  var is not specified, `#'zou.framework.core/+core-system+` will be
+  used. Note that an old instance bound to the given var will be
+  stopped before creating a new instance if exists."
+  ([] (boot-core! (conf/read-config (conf/fetch-config-or-abort))))
+  ([conf] (boot-core! #'+core-system+ conf))
   ([core-var conf]
    (alter-var-root
     core-var
     (fn [old]
-      (if (nil? old)
-        (c/try-recovery (c/start (make-core-from-conf conf)))
-        (do
-          (log/warn "Core System is already running. Rebooting...")
-          (c/stop old)
-          (c/start (make-core-from-conf (read-bootstrap-config)))))))))
+      (let [boot #(c/try-recovery (c/start (make-core conf)))]
+        (if (nil? old)
+          (boot)
+          (do
+            (log/warn "Core System is already running. Rebooting...")
+            (c/stop old)
+            (boot))))))))
 
 (defn shutdown-core!
-  ([] (shutdown-core! #'core-system))
+  "Stop the core system bound to the given var. If the var is not
+  specified, `#'zou.framework.core/+core-system+` will be used."
+  ([] (shutdown-core! #'+core-system+))
   ([core-var]
    (alter-var-root
     core-var
@@ -109,36 +59,21 @@
         (c/stop sys))
       nil))))
 
+(defn run-core
+  "Run the given core system with `zou.framework.entrypoint.proto/EntryPoint#run`.
+  The core system will delegate its process to an entry point
+  component that is a member of it. By default,
+  `zou.framework.entrypoint.impl.DefaultEntryPoint` is assinged to the
+  etnry point component."
+  [core-system & args]
+  (ep/run core-system args))
 
-;;; Built-in core modules
-;;; ---------------------
-
-(defrecord AutoLoader [exclude-classpath prefixes]
-  c/Lifecycle
-  (start [this]
-    (when (seq prefixes)
-      (apply ns/require-all exclude-classpath prefixes))
-    this)
-  (stop [this]
-    this))
-
-(defrecord LoggingConfigurator [bridge-out?]
-  c/Lifecycle
-  (start [this]
-    (when bridge-out?
-      (ur/bridge-out!))
-    (log/start-logging! (dissoc (into {} this)
-                                :bridge-out?))
-    this)
-  (stop [this]
-    (ur/restore-out!)
-    this))
-
-(defrecord ExtensionLoader []
-  c/Lifecycle
-  (start [this]
-    (ext/initialize-extensions)
-    this)
-  (stop [this]
-    (ext/deinitialize-extensions)
-    this))
+(defn core-system
+  "Return the current instance of CoreSystem. You should use this only
+  for debugging purposes or for convenience during development. Note
+  that this works only when the instance is bound to
+  `#'zou.framework.core/+core-system+`."
+  []
+  (when-not (bound? #'+core-system+)
+    (throw (RuntimeException. "Failed to find a core system. Did you forget to start it?")))
+  +core-system+)

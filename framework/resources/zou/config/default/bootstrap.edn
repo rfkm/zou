@@ -1,12 +1,10 @@
 {:auto-load
- {:zou/constructor   zou.framework.core/map->AutoLoader
-  :zou/tags          [:tag.core-extension]
+ {:zou/constructor   zou.framework.core.auto-loader/map->AutoLoader
   :prefixes          []
   :exclude-classpath "test"}
 
  :logging
- {:zou/constructor zou.framework.core/map->LoggingConfigurator
-  :zou/tags        [:tag.core-extension]
+ {:zou/constructor zou.framework.core.logging/map->LoggingConfigurator
   :bridge-out?     #zou/cond {:dev  true
                               :else false}
   :level           #zou/if-prod [:info :debug]
@@ -18,10 +16,16 @@
                     "com.zaxxer.hikari"                      :info}}
 
  :extension-loader
- {:zou/constructor  zou.framework.core/map->ExtensionLoader
+ {:zou/constructor  zou.framework.core.ext-loader/map->ExtensionLoader
   :zou/dependencies {:logging :logging} ; should load after logging setup
-  :zou/tags         [:tag.core-extension]}
+  }
 
- :core
- {:zou/constructor zou.framework.core/map->Core
-  :zou/optionals   {:extensions :tag.core-extension}}}
+ :entrypoint
+ {:zou/constructor  zou.framework.entrypoint.impl/map->DefaultEntryPoint
+  :zou/dependencies {:container   :container}
+  :exit-process?    #zou/cond {:prod true
+                               :else false}}
+
+ :container
+ {:zou/constructor zou.framework.container.impl/new-default-container
+  :system-specs    {:main #import #resource "zou/config/config.edn"}}}

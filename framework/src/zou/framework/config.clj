@@ -4,7 +4,7 @@
             [environ.core :as environ]
             [zou.framework.env :as env]))
 
-(def default-config-path "zou/config/config.edn")
+(def default-config-path "zou/config/bootstrap.edn")
 
 (def config-env-key :zou-config)
 

@@ -1,38 +1,13 @@
 (ns zou.framework.main
   (:gen-class)
-  (:require [cling.core :as cli]
-            [clojure.java.io :as io]
+  (:require [zou.framework.cli :as cli]
             [zou.framework.config :as conf]
-            [zou.framework.core :as core]
-            [zou.framework.env :as env]))
+            [zou.framework.core :as core]))
 
-(def global-options
-  [["-c" "--config PATH" "Config file"
-    :parse-fn io/file
-    :default (conf/fetch-config-or-abort)
-    :validate [#(.exists ^java.io.File %)  "File does not exist"
-               #(.isFile ^java.io.File %)  "Path is not a regular file"
-               #(.canRead ^java.io.File %) "File is unreadable"]
-    :default-desc "resource://zou/config/config.edn"]])
-
-(defn run [conf-source]
-  (core/boot-core!)
-  (core/load-system (core/core) conf-source)
-  (core/start-systems (core/core)))
-
-(cli/defcmd run-cmd
-  "Start up the system"
-  []
-  []
-  [{:keys [options]}]
-  (run (:config options))
-  (cli/keep-alive))
-
-(cli/defcontainer root
-  global-options
-  run-cmd)
-
-(cli/defentrypoint -main
-  root
-  {:project-id "zou-framework"
-   :exit-process? (env/in-prod?)})
+(defn -main
+  [& args]
+  (let [core (-> args
+                 cli/extract-config-file
+                 conf/read-config
+                 core/boot-core!)]
+    (apply core/run-core core args)))
