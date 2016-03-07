@@ -1,5 +1,4 @@
-(ns zou.framework.container.proto
-  (:refer-clojure :exclude [get keys remove]))
+(ns zou.framework.container.proto)
 
 (defprotocol SystemContainer
   (get-system [this system-key])
