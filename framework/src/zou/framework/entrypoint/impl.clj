@@ -62,7 +62,7 @@
    (assoc true (default-cmd-container container))
    ;; Attach global option specs
    (ctx/with-context {:option-specs [cli/conf-option]})
-   ;; Finally, create a entry point function
+   ;; Finally, create an entry point function
    (task/create-entrypoint {:exit-process? exit-process?})))
 
 
