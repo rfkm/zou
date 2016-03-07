@@ -54,7 +54,8 @@
                                        [lein-file-replace "0.1.0"]]
                         :env          {:zou-env "dev"}
                         :aliases      {"coverage" ["with-profile" "+coverage" "do"
-                                                   ["cloverage" "--codecov"]
+                                                   ["cloverage" "--codecov"
+                                                    "-r" "midje"]
                                                    ["exec" "-p" "etc/codecov.clj"]]
                                        "modules+" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl)]
                                        "modules++" ["modules" ":dirs" ~(clojure.string/join "," modules+tpl+parent)]
