@@ -11,7 +11,7 @@
    :validate [#(.exists ^java.io.File %)  "File does not exist"
               #(.isFile ^java.io.File %)  "Path is not a regular file"
               #(.canRead ^java.io.File %) "File is unreadable"]
-   :default-desc "resource://zou/config/config.edn"])
+   :default-desc (str "resource://" conf/default-config-path)])
 
 (defn extract-config-file [args]
   (let [{:keys [errors options]} (cli/parse-opts args [conf-option])]
