@@ -99,12 +99,10 @@
 
         ;; SASSC
         ;; ---------------------------------------------------------------------
-        :sassc
-        {:builds [
-                  {:src        "src-scss/main.scss"
-                   :output-to  "resources/public/css/dist/main.css"
-                   :style      "compressed" ; nested/expanded/compact/compressed
-                   :load-path  "src-scss"
-                   :serve-path "/css/dist/main.css" ; for asset provider
-                   }]
-         :watch? true}}}
+        :sassc-builds
+        [{:src        "src-scss/main.scss"
+          :output-to  "resources/public/css/dist/main.css"
+          :style      "compressed" ; nested/expanded/compact/compressed
+          :load-path  "src-scss"
+          :serve-path "/css/dist/main.css" ; for asset provider
+          }]}}

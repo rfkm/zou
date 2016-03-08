@@ -6,6 +6,7 @@
             [midje.sweet :refer :all]
             [zou.component :as c]
             [zou.logging :as log]
+            [zou.task :as task]
             [zou.web.asset.proto :as aproto]
             [zou.web.sassc :as sut]))
 
@@ -120,3 +121,12 @@
         (aproto/assets c) => [{:name "/main.css"
                                :type :stylesheet
                                :src "out.css"}]))))
+
+(t/deftest task-test
+  (fact
+    (let [c (sut/map->SasscTask {:builds [conf]})
+          ep (task/create-entrypoint (task/task->cmd c) {})]
+      (ep "compile") => nil
+      (provided
+        (sut/touch conf) => anything
+        (sut/compile conf) => anything))))

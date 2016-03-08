@@ -2,10 +2,12 @@
   (:refer-clojure :exclude [compile])
   (:require [clojure.java.io :as io]
             [clojure.java.shell :as sh]
+            [clojure.string :as str]
             [hawk.core :as hawk]
             [schema.core :as s]
             [zou.component :as c]
             [zou.logging :as log]
+            [zou.task :as task]
             [zou.web.asset.proto :as aproto]))
 
 (def SasscConfig {:src s/Str
@@ -117,3 +119,35 @@
     (->> builds
          (map extract-asset-spec)
          (filter identity))))
+
+
+;;; Task
+
+(def task-spec (let [actions     #{:compile}
+                     lit-actions (str/join ", " (map name actions))]
+                 {:desc           "Run the Sass compiler"
+                  :long-desc      (str "Run the Sass compiler. Available actions are: "
+                                       lit-actions)
+                  :argument-specs [["action"
+                                    :parse-fn keyword
+                                    :validate [actions (str "Currently supported actions are: "
+                                                            lit-actions)]]]}))
+
+(defmulti sassc-task (fn [action builds] action))
+
+(defmethod sassc-task :default [action _]
+  (log/errorf "Unknown action: %s" (name action)))
+
+(defmethod sassc-task :compile [_ builds]
+  (doseq [c builds]
+    (touch c)
+    (compile c)))
+
+(defrecord SasscTask [builds]
+  task/Task
+  (task-name [this]
+    :sassc)
+  (spec [this]
+    task-spec)
+  (exec [this {:keys [arguments]}]
+    (sassc-task (:action arguments) builds)))

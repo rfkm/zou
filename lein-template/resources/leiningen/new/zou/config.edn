@@ -90,18 +90,17 @@
 
         ;; SASSC
         ;; ---------------------------------------------------------------------
-        :sassc
-        {:builds [{{#scss?}}
-                  {:src        "src-scss/main.scss"
-                   :output-to  "resources/public/css/dist/main.css"
-                   :style      "compressed" ; nested/expanded/compact/compressed
-                   :load-path  "src-scss"
-                   :serve-path "/css/dist/main.css" ; for asset provider
-                   }{{/scss?}}{{#sass?}}
-                  {:src        "src-sass/main.sass"
-                   :output-to  "resources/public/css/dist/main.css"
-                   :style      "compressed" ; nested/expanded/compact/compressed
-                   :load-path  "src-sass"
-                   :serve-path "/css/dist/main.css" ; for asset provider
-                   }{{/sass?}}]
-         :watch? true}{{/sassc?}}}}
+        :sassc-builds
+        [{{#scss?}}
+         {:src        "src-scss/main.scss"
+          :output-to  "resources/public/css/dist/main.css"
+          :style      "compressed" ; nested/expanded/compact/compressed
+          :load-path  "src-scss"
+          :serve-path "/css/dist/main.css" ; for asset provider
+          }{{/scss?}}{{#sass?}}
+         {:src        "src-sass/main.sass"
+          :output-to  "resources/public/css/dist/main.css"
+          :style      "compressed" ; nested/expanded/compact/compressed
+          :load-path  "src-sass"
+          :serve-path "/css/dist/main.css" ; for asset provider
+          }{{/sass?}}]{{/sassc?}}}}

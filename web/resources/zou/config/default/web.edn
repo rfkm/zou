@@ -68,17 +68,24 @@
            ;;   :source-map-timestamp true}}
            ]}
 
+ :sassc-builds
+ [;; {:src        "src-scss/main.scss"
+  ;;  :output-to  "resources/public/css/dist/test.css"
+  ;;  :style      "compressed"
+  ;;  :load-path  "src/scss"
+  ;;  :serve-path "/css/dist/test.css"}
+  ]
+
  :sassc
  {:zou/constructor zou.web.sassc/map->SasscCompiler
+  :zou/dependencies {:builds :sassc-builds}
   :zou/tags [:tag.asset-provider]
-  :builds [ ;; {:src        "src-scss/main.scss"
-           ;;  :output-to  "resources/public/css/dist/test.css"
-           ;;  :style      "compressed"
-           ;;  :load-path  "src/scss"
-           ;;  :serve-path "/css/dist/test.css"}
-           ]
   :watch? #zou/if-prod [false true]
   :initial-build? #zou/if-prod [false true]}
+
+ :sassc-task
+ {:zou/constructor zou.web.sassc/map->SasscTask
+  :zou/dependencies {:builds :sassc-builds}}
 
  :request-context
  {:zou/constructor zou.web.context/map->RequestContext}
