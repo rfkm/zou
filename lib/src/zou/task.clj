@@ -1,7 +1,6 @@
 (ns zou.task
   (:require [cling.context :as ctx]
             [cling.entrypoint :as ce]
-            [cling.process :as proc]
             [cling.util.project :as up]))
 
 (defprotocol Task
@@ -26,5 +25,4 @@
         spec (ctx/with-context spec (ctx/merge-context ctx (ctx/get-context spec)))
         ep   (ce/create-handler spec ctx)]
     (fn [& args]
-      (binding [proc/*exit-process?* (:exit-process? config false)]
-        (ep args)))))
+      (ep args))))
