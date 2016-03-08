@@ -19,10 +19,10 @@
 
 (t/deftest gen-args-test
   (fact "gen-args"
-    (#'sut/gen-args conf) => [ "--sourcemap" "--style" "nested" "--precision" 3 "--load-path" "lib" "src.scss" "out.css"]
+    (#'sut/gen-args conf) => [ "--sourcemap" "--style" "nested" "--precision" "3" "--load-path" "lib" "src.scss" "out.css"]
     (#'sut/gen-args (assoc conf :load-path ["lib" "lib2"]))
     =>
-    ["--sourcemap" "--style" "nested" "--precision" 3 "--load-path" "lib" "--load-path" "lib2" "src.scss" "out.css"]))
+    ["--sourcemap" "--style" "nested" "--precision" "3" "--load-path" "lib" "--load-path" "lib2" "src.scss" "out.css"]))
 
 (t/deftest touch+clean-test
   (fact "touch + clean"

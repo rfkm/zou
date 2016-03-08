@@ -34,13 +34,14 @@
     []))
 
 (defn- gen-args [conf]
-  (concat
-   (mapcat #(opt % (% conf)) [:sourcemap :omit-map-comment])
-   (mapcat #(opt-with-arg % (% conf)) [:style :precision])
-   (mapcat #(mapcat (fn [v] (opt-with-arg % v))
-                    (vectorize (% conf)))
-           [:load-path])
-   [(:src conf) (:output-to conf)]))
+  (map str
+       (concat
+        (mapcat #(opt % (% conf)) [:sourcemap :omit-map-comment])
+        (mapcat #(opt-with-arg % (% conf)) [:style :precision])
+        (mapcat #(mapcat (fn [v] (opt-with-arg % v))
+                         (vectorize (% conf)))
+                [:load-path])
+        [(:src conf) (:output-to conf)])))
 
 (s/defn ^:always-validate compile [conf :- SasscConfig]
   (io/make-parents (:output-to conf))
