@@ -1,5 +1,5 @@
 (ns zou.test-task
-  (:require [zou.framework.task :as task]
+  (:require [zou.task :as task]
             [zou.component :as c]))
 
 (defrecord MyTask []

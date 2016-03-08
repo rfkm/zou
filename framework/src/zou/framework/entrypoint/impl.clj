@@ -7,7 +7,7 @@
             [zou.framework.container :as container]
             [zou.framework.container.proto :as cproto]
             [zou.framework.entrypoint.proto :as proto]
-            [zou.framework.task :as task]))
+            [zou.task :as task]))
 
 (defn- default-cmd-fn [container]
   (ctx/with-context
@@ -42,15 +42,19 @@
        (select-keys system)
        c/map->SystemMap))
 
+(defn- system-aware-cmd [system task-component-key]
+  (ctx/with-context
+    (fn [env]
+      (c/with-component [started-system (narrow-down-system system task-component-key)]
+        ;; refetch the task component from the started system
+        (task/exec (get started-system task-component-key) env)))
+    (task/spec (get system task-component-key))))
+
 (defn- tasks->container [tasks]
   (into {}
         (for [[[sys k] t] tasks]
           [(task/task-name t)
-           (ctx/with-context
-             (fn [env]
-               (c/with-component [s (narrow-down-system sys k)]
-                 (task/exec (get s k) env)))
-             (task/spec t))])))
+           (system-aware-cmd sys k)])))
 
 (defn- create-entrypoint [container exit-process?]
   (->

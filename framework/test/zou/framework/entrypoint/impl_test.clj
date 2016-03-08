@@ -5,7 +5,7 @@
             [zou.framework.container :as container]
             [zou.framework.entrypoint.impl :as sut]
             [zou.framework.entrypoint.proto :as proto]
-            [zou.framework.task :as task]
+            [zou.task :as task]
             [zou.logging :as log]))
 
 (def task-foo (reify c/Lifecycle
