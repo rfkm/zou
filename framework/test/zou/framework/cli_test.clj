@@ -7,7 +7,7 @@
 
 (t/deftest extract-config-file-test
   (fact
-    (sut/extract-config-file ["-c" "project.clj"]) => (io/file "project.clj"))
+    (sut/extract-config-file ["foo" "--bar" "-c" "project.clj"]) => (io/file "project.clj"))
 
   (fact
-    (sut/extract-config-file ["-c" "non-existent-file"]) => (throws IllegalArgumentException #"Failed to load config file")))
+    (sut/extract-config-file ["foo" "--bar" "-c" "non-existent-file"]) => (throws IllegalArgumentException #"Failed to load config file")))

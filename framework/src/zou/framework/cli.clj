@@ -13,8 +13,12 @@
               #(.canRead ^java.io.File %) "File is unreadable"]
    :default-desc (str "resource://" conf/default-config-path)])
 
+(defn- unknown-option-error? [err]
+  (some? (re-find #"Unknown option" err)))
+
 (defn extract-config-file [args]
-  (let [{:keys [errors options]} (cli/parse-opts args [conf-option])]
+  (let [{:keys [errors options]} (cli/parse-opts args [conf-option])
+        errors (remove unknown-option-error? errors)]
     (if (seq errors)
       (do
         (doseq [err errors]
