@@ -15,6 +15,13 @@
   (run [this args]
     (ep/run entrypoint args)))
 
+(defmethod print-method DefaultBootstrapSystem
+  [container ^java.io.Writer writer]
+  (.write writer "#<DefaultBootstrapSystem")
+  (doseq [k (keys container)]
+    (.write writer (str " " k)))
+  (.write writer ">"))
+
 (defn new-bootstrap-system
   "Create an instance of DefaultBootstrapSystem with the given config
   map."
