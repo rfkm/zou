@@ -5,8 +5,8 @@
             [zou.framework.container :as container]
             [zou.framework.entrypoint.impl :as sut]
             [zou.framework.entrypoint.proto :as proto]
-            [zou.task :as task]
-            [zou.logging :as log]))
+            [zou.logging :as log]
+            [zou.task :as task]))
 
 (def task-foo (reify c/Lifecycle
                 (start [this]
@@ -36,19 +36,17 @@
 (t/deftest default-entry-point-test
   (facts "DefaultEntryPoint"
     (against-background
-     (container/systems ..container..) => {:sys-a (c/map->SystemMap {:a {}
-                                                                     :b {}
-                                                                     :foo task-foo})
-                                           :sys-b (c/map->SystemMap {:a {}
-                                                                     :b {}
-                                                                     :bar task-bar})})
+     (container/system ..container..) => (c/map->SystemMap {:a {}
+                                                            :b {}
+                                                            :foo task-foo
+                                                            :bar task-bar}))
 
     (let [ep (sut/map->DefaultEntryPoint {:container ..container..})]
       (fact "If no subtask is specified, start the whole system."
         (proto/run ep []) => anything
         (provided
          ;; Ensure the default command is called
-         (container/start-systems! ..container..) => ..started..))
+         (container/start-system! ..container..) => ..started..))
 
       (fact "Run sub task"
         (proto/run ep ["foo" "-f"]) => true

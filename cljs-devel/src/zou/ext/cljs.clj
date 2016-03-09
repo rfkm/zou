@@ -7,15 +7,14 @@
   (:import zou.cljs.figwheel.Figwheel))
 
 (defn- find-figwheel-system []
-  (for [[_ sys] (container/systems (:container (core/bootstrap-system)))
-        [_ c] sys
+  (for [[_ c] (container/system (:container (core/bootstrap-system)))
         :when (and (instance? Figwheel c)
                    (:figwheel-system c))]
     (:figwheel-system (:figwheel-system c))))
 
 (defn cljs-repl
   ([& ks]
-   (if-let [fig (get-in (container/systems (:container (core/bootstrap-system))) ks)]
+   (if-let [fig (get-in (container/system (:container (core/bootstrap-system))) ks)]
      (fig/cljs-repl fig)
      (throw (Exception. "Can't find figwheel component"))))
   ([]

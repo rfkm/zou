@@ -2,40 +2,28 @@
   (:require [zou.framework.container.proto :as proto]
             [zou.component :as c]))
 
-(defn system [container system-key]
-  (proto/get-system container system-key))
+(defn component [container component-key]
+  (proto/get-component container component-key))
 
-(defn systems
+(defn system
   ([container]
-   (->> (proto/system-keys container)
-        (map #(vector % (proto/get-system container %)))
-        (into {}))))
+   (proto/as-system container)))
 
-(defn add-system! [container system-key system]
-  (proto/add-system container system-key system))
+(defn- transitive-dep-keys [system k]
+  (letfn [(f [k]
+            (if-let [dep-keys (seq (vals (c/dependencies (get system k))))]
+              (conj (mapcat f dep-keys) k)
+              [k]))]
+    (f k)))
 
-(defn add-systems! [container systems]
-  (reduce-kv add-system! container systems))
+(defn- narrow-system [system & ks]
+  (select-keys system (reduce into #{} (map #(transitive-dep-keys system %) ks))))
 
-(defn start-system! [container system-key]
-  (proto/start-system container system-key))
+(defn subsystem [container & ks]
+  (apply narrow-system (system container) ks))
 
-(defn start-systems! [container]
-  (reduce start-system! container (proto/system-keys container)))
+(defn start-system! [container]
+  (proto/start-system container))
 
-(defn stop-system! [container system-key]
-  (proto/stop-system container system-key))
-
-(defn stop-systems! [container]
-  (reduce stop-system! container (proto/system-keys container)))
-
-(defn remove-system! [container system-key]
-  (proto/remove-system container system-key))
-
-(defn load-system! [container conf-map system-key]
-  (->> conf-map
-       c/build-nested-system-map
-       (add-system! container system-key)))
-
-(defn load-systems! [container system-specs]
-  (reduce-kv load-system! container system-specs))
+(defn stop-system! [container]
+  (proto/stop-system container))

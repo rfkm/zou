@@ -22,17 +22,10 @@
   (stop)
   (tnr/refresh :after 'zou.framework.repl/go))
 
-(defn system* [system-key & ks]
-  (get-in (container/system (:container (core/bootstrap-system)) system-key) ks))
-
 (defn system [& ks]
-  ;; Assuming the system key is `:main`
-  (apply system* :main ks))
+  (get-in (container/system (:container (core/bootstrap-system))) ks))
 
 (def $ #'system)
 
 (defn inject-util-to-core []
   (ns/inject clojure.core $))
-
-(defn systems []
-  (container/systems (:container (core/bootstrap-system))))

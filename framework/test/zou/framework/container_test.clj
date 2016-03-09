@@ -5,50 +5,33 @@
             [zou.framework.container :as sut]
             [zou.framework.container.impl :as impl]))
 
+(defrecord Foo []
+  c/Lifecycle
+  (start [this]
+    (assoc this :started true))
+  (stop [this]
+    (assoc this :stopped true)))
+
 (t/deftest container-test
   (fact "container"
-    (let [container (c/start (impl/new-default-container {}))]
-      ;; lifecycle test
-      (fact "add"
-        (sut/add-system! container :key ..sys..) => container
-        (sut/system container :key) => ..sys..)
+    (let [new-container #(c/start (impl/new-default-container {:s {:c {:zou/constructor map->Foo}}}))]
 
+      ;; lifecycle test
       (fact "start"
-        (sut/start-system! container :key) => container
-        (provided
-         (c/start ..sys..) => ..sys'..)
-        (sut/system container :key) => ..sys'..)
+        (let [container (new-container)]
+          (get-in (sut/system container) [:s/c :started]) => nil
+          (sut/start-system! container) => container
+          (get-in (sut/system container) [:s/c :started]) => true))
 
       (fact "stop"
-        (sut/stop-system! container :key) => container
-        (provided
-         (c/stop ..sys'..) => ..sys''..)
-        (sut/system container :key) => ..sys''..)
-
-      (fact "remove"
-        (sut/remove-system! container :key) => container
-        (sut/system container :key) => nil)
+        (let [container (new-container)]
+          (get-in (sut/system container) [:s/c :stopped]) => nil
+          (sut/stop-system! container) => container
+          (get-in (sut/system container) [:s/c :stopped]) => true))
 
       (fact "stop container"
-        (sut/add-system! container :key ..sys..) => container
-        (c/stop container) => anything
-        (provided
-         ;; should stop user systems too
-         (c/stop ..sys..) => ..sys'..)))
-
-    (fact "load-system!"
-      (fact "config map"
-        (let [container (c/start (impl/new-default-container {}))]
-          (sut/load-system! container {:a {:a :a}
-                                       :b {:b :b}
-                                       :c false ; ignore
-                                       }
-                            :main)
-          =>
-          container
-          (provided
-           (c/build-nested-system-map {:a {:a :a}
-                                       :b {:b :b}
-                                       :c false ; ignore
-                                       }) => ..sys..)
-          (sut/system container :main) => ..sys..)))))
+        (let [container (new-container)]
+          (sut/start-system! container) => container
+          (c/stop container) => anything
+          ;; should stop user systems too
+          (get-in (sut/system container) [:s/c :stopped]) => true)))))

@@ -4,68 +4,64 @@
             [zou.logging :as log]
             [zou.util :as u]))
 
-(defn get-system [a k]
+(defn get-component [a k]
   (get @a k))
 
-(defn system-keys [a]
+(defn as-system [a]
+  @a)
+
+(defn component-keys [a]
   (keys @a))
 
-(defn add-system! [a k sys]
-  (swap! a assoc k sys))
+(defn add-component! [a k component]
+  (swap! a assoc k component))
 
-(defn remove-system! [a k]
+(defn remove-component! [a k]
   (swap! a dissoc k))
 
-(defn start-system! [a k]
-  (swap! a update k #(c/try-recovery (c/start %))))
+(defn start-system! [a]
+  (swap! a #(c/try-recovery (c/start %))))
 
-(defn stop-system! [a k]
-  (swap! a update k c/stop))
+(defn stop-system! [a]
+  (swap! a c/stop))
 
-(defn start-container! [container]
-  (->> container
-       :system-specs
-       (u/map-vals c/build-nested-system-map)
-       (reduce-kv proto/add-system container)))
-
-(defn stop-container! [container]
-  (reduce (fn [c k]
-            (log/infof "Stopping a system: %s" k)
-            (proto/stop-system c k))
-          container
-          (proto/system-keys container)))
-
-(defrecord DefaultContainer [system-specs systems]
-  proto/SystemContainer
-  (get-system [this system-key]
-    (get-system systems system-key))
-  (system-keys [this]
-    (system-keys systems))
-  (add-system [this system-key system]
-    (add-system! systems system-key system)
+(defrecord DefaultContainer []
+  proto/ComponentContainer
+  (get-component [this component-key]
+    (get-component (::system this) component-key))
+  (as-system [this]
+    (as-system (::system this)))
+  (component-keys [this]
+    (component-keys (::system this)))
+  (add-component [this component-key component]
+    (add-component! (::system this) component-key component)
     this)
-  (remove-system [this system-key]
-    (remove-system! systems system-key)
+  (remove-component [this component-key]
+    (remove-component! (::system this) component-key)
     this)
-  (start-system [this system-key]
-    (start-system! systems system-key)
+  (start-system [this]
+    (start-system! (::system this))
     this)
-  (stop-system [this system-key]
-    (stop-system! systems system-key)
+  (stop-system [this]
+    (stop-system! (::system this))
     this)
 
   c/Lifecycle
   (start [this]
-    (start-container! this))
+    (let [sys-a (::system this (atom nil))]
+      (reset! sys-a (-> this
+                        (dissoc ::system)
+                        c/build-nested-system-map))
+      (assoc this ::system sys-a)))
   (stop [this]
-    (stop-container! this)))
+    (proto/stop-system this)))
 
 (defmethod print-method DefaultContainer
-  [system ^java.io.Writer writer]
+  [container ^java.io.Writer writer]
   (.write writer "#<DefaultContainer")
-  (doseq [k (proto/system-keys system)]
+  (doseq [k (proto/component-keys container)]
     (.write writer (str " " k)))
   (.write writer ">"))
 
-(defn new-default-container [{:keys [system-specs]}]
-  (->DefaultContainer system-specs (atom {})))
+(defn new-default-container [system-spec]
+  (map->DefaultContainer (assoc system-spec ::system (atom {}))))
