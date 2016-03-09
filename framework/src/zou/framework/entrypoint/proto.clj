@@ -2,3 +2,6 @@
 
 (defprotocol EntryPoint
   (run [this args]))
+
+(defn entrypoint? [x]
+  (satisfies? EntryPoint x))

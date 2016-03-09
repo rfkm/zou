@@ -9,7 +9,7 @@
                   {:url "https://s3.amazonaws.com/zou-repo"}]]
   :uberjar-name "{{uberjar-name}}"
   :repl-options {:init-ns zou.framework.repl
-                 :init (zou.framework.core/boot-core!)}
+                 :init (zou.framework.core/boot!)}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [zou ~zou-version]{{#h2?}}
                  [com.h2database/h2 "1.4.190"]{{/h2?}}{{#postgresql?}}

@@ -9,10 +9,10 @@
 
 (defn go []
   (inject-util-to-core)
-  (core/run-core (core/boot-core!)))
+  (core/run (core/boot!)))
 
 (defn stop []
-  (core/shutdown-core!))
+  (core/shutdown!))
 
 (defn restart []
   (stop)
@@ -23,7 +23,7 @@
   (tnr/refresh :after 'zou.framework.repl/go))
 
 (defn system* [system-key & ks]
-  (get-in (container/system (:container (core/core-system)) system-key) ks))
+  (get-in (container/system (:container (core/bootstrap-system)) system-key) ks))
 
 (defn system [& ks]
   ;; Assuming the system key is `:main`
@@ -35,4 +35,4 @@
   (ns/inject clojure.core $))
 
 (defn systems []
-  (container/systems (:container (core/core-system))))
+  (container/systems (:container (core/bootstrap-system))))

@@ -10,6 +10,6 @@
   (let [core (-> args
                  cli/extract-config-file
                  conf/read-config
-                 core/boot-core!)]
+                 core/boot!)]
     (binding [proc/*exit-process?* true]
-      (apply core/run-core core args))))
+      (apply core/run core args))))

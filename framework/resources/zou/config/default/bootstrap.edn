@@ -1,4 +1,5 @@
-{:auto-load
+{:zou/constructor zou.framework.bootstrap.impl/new-bootstrap-system
+ :auto-load
  {:zou/constructor   zou.framework.core.auto-loader/map->AutoLoader
   :prefixes          []
   :exclude-classpath "test"}
