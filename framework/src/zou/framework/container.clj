@@ -9,18 +9,8 @@
   ([container]
    (proto/as-system container)))
 
-(defn- transitive-dep-keys [system k]
-  (letfn [(f [k]
-            (if-let [dep-keys (seq (vals (c/dependencies (get system k))))]
-              (conj (mapcat f dep-keys) k)
-              [k]))]
-    (f k)))
-
-(defn- narrow-system [system & ks]
-  (select-keys system (reduce into #{} (map #(transitive-dep-keys system %) ks))))
-
 (defn subsystem [container & ks]
-  (apply narrow-system (system container) ks))
+  (proto/narrow container ks))
 
 (defn start-system! [container]
   (proto/start-system container))

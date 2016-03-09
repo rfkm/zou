@@ -25,6 +25,16 @@
 (defn stop-system! [a]
   (swap! a c/stop))
 
+(defn- transitive-dep-keys [system k]
+  (letfn [(f [k]
+            (if-let [dep-keys (seq (vals (c/dependencies (get system k))))]
+              (conj (mapcat f dep-keys) k)
+              [k]))]
+    (f k)))
+
+(defn- narrow-system [system ks]
+  (c/map->SystemMap (select-keys system (reduce into #{} (map #(transitive-dep-keys system %) ks)))))
+
 (defrecord DefaultContainer []
   proto/ComponentContainer
   (get-component [this component-key]
@@ -45,6 +55,8 @@
   (stop-system [this]
     (stop-system! (::system this))
     this)
+  (narrow [this ks]
+    (narrow-system (proto/as-system this) ks))
 
   c/Lifecycle
   (start [this]

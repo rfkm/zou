@@ -3,52 +3,71 @@
             [midje.sweet :refer :all]
             [zou.component :as c]
             [zou.framework.container :as container]
+            [zou.framework.container.impl :as c.impl]
             [zou.framework.entrypoint.impl :as sut]
             [zou.framework.entrypoint.proto :as proto]
             [zou.logging :as log]
             [zou.task :as task]))
 
-(def task-foo (reify c/Lifecycle
-                (start [this]
-                  (log/info "start-foo")
-                  this)
-                (stop [this]
-                  (log/info "stop-foo")
-                  this)
+(defrecord FooTask []
+  c/Lifecycle
+  (start [this]
+    (log/info "start-foo")
+    this)
+  (stop [this]
+    (log/info "stop-foo")
+    this)
 
-                task/Task
-                (task-name [this]
-                  :foo)
-                (exec [this env]
-                  (log/info "exec-foo")
-                  (get-in env [:options :foo]))
-                (spec [this]
-                  {:option-specs [["-f" "--foo"]]})))
+  task/Task
+  (task-name [this]
+    :foo)
+  (exec [this env]
+    (log/info "exec-foo")
+    (get-in env [:options :foo]))
+  (spec [this]
+    {:option-specs [["-f" "--foo"]]}))
 
-(def task-bar (reify task/Task
-                (task-name [this]
-                  :bar)
-                (exec [this env]
-                  :bar-res)
-                (spec [this]
-                  {})))
+(defrecord BarTask []
+  c/Lifecycle
+  (start [this]
+    (log/info "start-bar")
+    this)
+  (stop [this]
+    (log/info "stop-bar")
+    this)
+  task/Task
+  (task-name [this]
+    :bar)
+  (exec [this env]
+    :bar-res)
+  (spec [this]
+    {}))
 
 (t/deftest default-entry-point-test
   (facts "DefaultEntryPoint"
-    (against-background
-     (container/system ..container..) => (c/map->SystemMap {:a {}
-                                                            :b {}
-                                                            :foo task-foo
-                                                            :bar task-bar}))
-
-    (let [ep (sut/map->DefaultEntryPoint {:container ..container..})]
+    (let [container (c/start (c.impl/new-default-container {:s {:a {}
+                                                                :b {}
+                                                                :foo {:zou/constructor map->FooTask
+                                                                      :zou/dependencies {:bar :bar}}
+                                                                :bar {:zou/constructor map->BarTask}}}))
+          ep (c/start (sut/map->DefaultEntryPoint {:exit-process? false
+                                                   :container container}))]
       (fact "If no subtask is specified, start the whole system."
         (proto/run ep []) => anything
         (provided
-         ;; Ensure the default command is called
-         (container/start-system! ..container..) => ..started..))
+          ;; Ensure the default command is called
+          (container/start-system! container) => ..started..))
 
       (fact "Run sub task"
-        (proto/run ep ["foo" "-f"]) => true
+        (log/with-test-logger
+          (proto/run ep ["foo" "-f"]) => true
+          (log/logged? #"exec-foo") => true
+
+          ;; Ensure task component's lifecycle works correctly
+          (log/logged? #"start-foo") => true
+          (log/logged? #"stop-foo") => true
+          (log/logged? #"start-bar") => true
+          (log/logged? #"stop-bar") => true)
+
         (proto/run ep ["foo"]) => nil
         (proto/run ep ["bar"]) => :bar-res))))

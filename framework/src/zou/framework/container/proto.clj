@@ -7,4 +7,5 @@
   (add-component [this component-key component])
   (remove-component [this component-key])
   (start-system [this])
-  (stop-system [this]))
+  (stop-system [this])
+  (narrow [this ks]))
