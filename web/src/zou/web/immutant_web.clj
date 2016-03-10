@@ -23,8 +23,8 @@
                                        default-handler)
                        conf))))
   (stop [this]
-    (log/infof "Stopping web server on port %d with context %s" port (or path "/"))
     (if-let [server (:server this)]
-      (do (immutant/stop server)
+      (do (log/infof "Stopping web server on port %d with context %s" port (or path "/"))
+          (immutant/stop server)
           (assoc this :server nil))
       this)))
