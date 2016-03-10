@@ -23,7 +23,7 @@
     :foo)
   (exec [this env]
     (log/info "exec-foo")
-    (get-in env [:options :foo]))
+    env)
   (spec [this]
     {:option-specs [["-f" "--foo"]]}))
 
@@ -43,13 +43,34 @@
   (spec [this]
     {}))
 
+(defrecord ContainerTask []
+  c/Lifecycle
+  (start [this]
+    (log/info "start container task")
+    this)
+  (stop [this]
+    (log/info "stop container task")
+    this)
+
+  task/Task
+  (task-name [this]
+    :baz)
+  (spec [this]
+    {:option-specs [["-p" "--parent-opt"]]})
+
+  task/TaskContainer
+  (tasks [this]
+    [(->FooTask)
+     (->BarTask)]))
+
 (t/deftest default-entry-point-test
   (facts "DefaultEntryPoint"
     (let [container (c/start (c.impl/new-default-container {:s {:a {}
                                                                 :b {}
                                                                 :foo {:zou/constructor map->FooTask
                                                                       :zou/dependencies {:bar :bar}}
-                                                                :bar {:zou/constructor map->BarTask}}}))
+                                                                :bar {:zou/constructor map->BarTask}
+                                                                :baz {:zou/constructor map->ContainerTask}}}))
           ep (c/start (sut/map->DefaultEntryPoint {:exit-process? false
                                                    :container container}))]
       (fact "If no subtask is specified, start the whole system."
@@ -60,7 +81,7 @@
 
       (fact "Run sub task"
         (log/with-test-logger
-          (proto/run ep ["foo" "-f"]) => true
+          (:options (proto/run ep ["foo" "-f"])) => (contains {:foo true})
           (log/logged? #"exec-foo") => true
 
           ;; Ensure task component's lifecycle works correctly
@@ -69,5 +90,6 @@
           (log/logged? #"start-bar") => true
           (log/logged? #"stop-bar") => true)
 
-        (proto/run ep ["foo"]) => nil
-        (proto/run ep ["bar"]) => :bar-res))))
+        (get-in (proto/run ep ["foo"]) [:options :foo]) => nil
+        (proto/run ep ["bar"]) => :bar-res
+        (:options (proto/run ep ["baz" "foo" "-p"])) => (contains {:parent-opt true})))))

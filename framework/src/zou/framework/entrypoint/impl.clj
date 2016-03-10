@@ -34,11 +34,38 @@
           (task/exec (get started-system task-component-key) env)))
       (task/spec (get system task-component-key)))))
 
+(defn- assert-duplication [tasks]
+  (let [task-names (map task/task-name tasks)]
+    (when-not (apply distinct? task-names)
+      (throw (ex-info "Found duplicated task name" {:task-names task-names})))))
+
+(defn- container-aware-cmd-container [container t-container-key]
+  (let [system (container/system container)
+        t-container (get system t-container-key)
+        tasks (task/tasks t-container)]
+    (assert-duplication tasks)
+    (ctx/with-context
+      (into {}
+            (for [t tasks
+                  :let [t-name (task/task-name t)]]
+              [t-name
+               (ctx/with-context
+                 (fn [env]
+                   (c/with-component [started-system (container/subsystem container t-container-key)]
+                     (task/exec (first (filter #(= t-name (task/task-name %))
+                                               (task/tasks (get started-system t-container-key))))
+                                env)))
+                 (task/spec t))]))
+      (task/spec t-container))))
+
 (defn- tasks->cmd-container [container tasks]
+  (assert-duplication (map last tasks))
   (into {}
         (for [[k t] tasks]
           [(task/task-name t)
-           (container-aware-cmd container k)])))
+           (if (satisfies? task/TaskContainer t)
+             (container-aware-cmd-container container k)
+             (container-aware-cmd container k))])))
 
 (defn- create-entrypoint [container exit-process?]
   (->
