@@ -23,7 +23,10 @@
     {:desc "Run the whole system"}))
 
 (defn- find-tasks [container]
-  (into {} (filter (fn [[k v]] (satisfies? task/Task v)) (container/system container))))
+  (->> container
+       container/system
+       (filter (fn [[_ v]] (satisfies? task/Task v)))
+       (into {})))
 
 (defn- container-aware-cmd [container task-component-key]
   (let [system (container/system container)]
