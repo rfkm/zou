@@ -123,31 +123,18 @@
 
 ;;; Task
 
-(def task-spec (let [actions     #{:compile}
-                     lit-actions (str/join ", " (map name actions))]
-                 {:desc           "Run the Sass compiler"
-                  :long-desc      (str "Run the Sass compiler. Available actions are: "
-                                       lit-actions)
-                  :argument-specs [["action"
-                                    :parse-fn keyword
-                                    :validate [actions (str "Currently supported actions are: "
-                                                            lit-actions)]]]}))
-
-(defmulti sassc-task (fn [action builds] action))
-
-(defmethod sassc-task :default [action _]
-  (log/errorf "Unknown action: %s" (name action)))
-
-(defmethod sassc-task :compile [_ builds]
-  (doseq [c builds]
-    (touch c)
-    (compile c)))
-
-(defrecord SasscTask [builds]
+(defrecord SasscTask [task-name builds]
   task/Task
   (task-name [this]
-    :sassc)
+    (or task-name :sassc))
   (spec [this]
-    task-spec)
-  (exec [this {:keys [arguments]}]
-    (sassc-task (:action arguments) builds)))
+    {:desc "Sass compiler tasks"})
+
+  task/TaskContainer
+  (tasks [this]
+    [(task/task :compile
+                (fn [_]
+                  (doseq [c builds]
+                    (touch c)
+                    (compile c)))
+                :desc "Run the Sass comiler")]))

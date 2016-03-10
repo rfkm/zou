@@ -126,7 +126,7 @@
   (fact
     (let [c (sut/map->SasscTask {:builds [conf]})
           ep (task/create-entrypoint (task/task->cmd c) {})]
-      (ep "compile") => nil
+      (ep "compile") => anything
       (provided
         (sut/touch conf) => anything
         (sut/compile conf) => anything))))
