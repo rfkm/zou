@@ -8,5 +8,5 @@
                  [potemkin "0.4.3"]
                  [prismatic/plumbing "0.5.2"]
                  [medley "0.7.2"]
-                 [com.rpl/specter "0.9.2"]]
+                 [com.rpl/specter "0.9.2" :exclusions [org.clojure/clojurescript]]]
   :plugins [[lein-modules "0.3.11"]])

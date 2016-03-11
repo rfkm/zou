@@ -11,7 +11,8 @@
                  [ring.middleware.conditional "0.2.0"]
                  [ring-webjars "0.1.1"]
                  [bidi "1.25.1"]
-                 [com.cemerick/url "0.1.1"]
+                 [com.cemerick/url "0.1.1" :exclusions [pathetic]]
+                 [pathetic "0.5.1"]
                  [prone "1.0.2"]
                  [hawk "0.2.10"]]
   :plugins [[lein-modules "0.3.11"]])
