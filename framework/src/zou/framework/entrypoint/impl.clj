@@ -14,7 +14,8 @@
     (fn [{:keys [arguments]}]
       (when (seq (:args arguments))
         (res/fail! (str "No such task: " (first (:args arguments)))))
-      (container/start-system! container))
+      (container/start-system! container)
+      (res/keep-alive))
     {:argument-specs [["args" :variadic? true :optional? true]]}))
 
 (defn- default-cmd-container [container]
