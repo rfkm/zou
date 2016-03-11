@@ -1,6 +1,5 @@
 (ns zou.logging
   (:require [clojure.string :as str]
-            [shodan.console :as console]
             [zou.util.platform :as up]
             #?@(:clj
                 [[clojure.tools.logging :as log]
@@ -11,14 +10,14 @@
 (defmacro log [level & args]
   `(up/if-cljs
     (case ~level
-      :debug (console/debug ~@args)
-      :error (console/error ~@args)
-      :fatal (console/error ~@args)
-      :info  (console/info ~@args)
+      :debug (.debug ~'js/console ~@args)
+      :error (.error ~'js/console ~@args)
+      :fatal (.error ~'js/console ~@args)
+      :info  (.info ~'js/console ~@args)
       ;; In CLJS, just ignore args and print stack trace.
-      :trace (console/trace)
-      :warn  (console/warn ~@args)
-      (console/log ~@args))
+      :trace (.trace ~'js/console)
+      :warn  (.warn ~'js/console ~@args)
+      (.log ~'js/console ~@args))
     (log/logp ~level ~@args)))
 
 (defmacro logf [level & args]
