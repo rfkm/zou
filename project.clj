@@ -9,7 +9,7 @@
   :dependencies [[zou/common :version]
                  [zou/lib :version]
                  [zou/framework :version]
-                 [zou/web :version]
+                 [zou/web :version :exclusions [org.apache.commons/commons-compress]]
                  [zou/db :version]]
   :plugins [[lein-modules "0.3.11"]]
   :profiles {:coverage {:source-paths   ~(subdir "src")
@@ -38,7 +38,7 @@
                                                :compiler {:output-to "resources/public/js/dist/testable.js"
                                                           :main zou.cljs.runner
                                                           :optimizations :none}}]}}
-             :dev      {:dependencies [[org.clojure/clojurescript "1.7.228"]
+             :dev      {:dependencies [[org.clojure/clojurescript "1.7.228" :exclusions [org.clojure/tools.reader]]
                                        [midje "1.8.3"]
                                        [org.clojure/clojure "1.8.0"]
                                        [clj-http "2.1.0"]
@@ -87,6 +87,7 @@
              :license      {:name "Eclipse Public License"
                             :url  "http://www.eclipse.org/legal/epl-v10.html"}
              :scm          {:dir ".."}
+             :pedantic? :warn
              :plugins      [[lein-environ "1.0.2"]]}}
 
   :release-tasks [["vcs" "assert-committed"]
