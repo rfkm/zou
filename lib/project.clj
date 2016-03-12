@@ -1,4 +1,4 @@
-(defproject zou/lib "0.1.0-alpha3-SNAPSHOT"
+(defproject zou/lib "0.1.0-alpha3"
   :dependencies [[zou/common :version]
                  [zou/component :version]
                  [rkworks/cling "0.1.3"]]

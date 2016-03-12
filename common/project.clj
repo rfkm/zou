@@ -1,4 +1,4 @@
-(defproject zou/common "0.1.0-alpha3-SNAPSHOT"
+(defproject zou/common "0.1.0-alpha3"
   :dependencies [[org.clojure/tools.logging "0.3.1"]
                  [spootnik/unilog "0.7.13"]
                  [shodan "0.4.2"]

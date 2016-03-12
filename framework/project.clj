@@ -1,4 +1,4 @@
-(defproject zou/framework "0.1.0-alpha3-SNAPSHOT"
+(defproject zou/framework "0.1.0-alpha3"
   :dependencies [[zou/common :version]
                  [zou/component :version]
                  [zou/lib :version]
