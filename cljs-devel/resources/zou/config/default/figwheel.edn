@@ -4,6 +4,10 @@
   :zou/disabled #zou/when-prod true
   :css-dirs ["resources/public/css"]}
 
+ :cljs-tasks
+ {:zou/constructor zou.cljs.compiler/map->CLJSTasks
+  :zou/optionals {:builds :cljs-builds}}
+
  ;; TODO: Clarify what is expected here
  :cljs-builds
  {;; :main {:serve-path "/js/dist/main.js"
