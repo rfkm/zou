@@ -22,8 +22,8 @@
                                          [cheshire "5.5.0"]
                                          [org.clojure/tools.cli "0.3.3"]]}
              :deploy   {:deploy-repositories [["zou-repo" {:url        "s3p://zou-repo/"
-                                                           :username   :env/aws_access_key_id
-                                                           :passphrase :env/aws_secret_access_key}]
+                                                           :username   [:gpg :env/aws_access_key_id]
+                                                           :passphrase [:gpg :env/aws_secret_access_key]}]
                                               ["releases" :zou-repo]
                                               ["snapshots" :zou-repo]]
                         :plugins             [[s3-wagon-private "1.2.0"]]}
