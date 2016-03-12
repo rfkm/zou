@@ -1,6 +1,25 @@
 {:figwheel
  {:zou/constructor zou.cljs.figwheel/figwheel
-  :zou/optionals {:cljsbuild :cljsbuild}
+  :zou/optionals {:builds :cljs-builds}
   :zou/disabled #zou/when-prod true
-  ;; :enable-server? #zou/if-prod [false true]
-  :css-dirs ["resources/public/css"]}}
+  :css-dirs ["resources/public/css"]}
+
+ ;; TODO: Clarify what is expected here
+ :cljs-builds
+ {;; :main {:serve-path "/js/dist/main.js"
+  ;;        :source-paths ["src" "src-cljs"]
+  ;;        :figwheel true
+  ;;        :compiler
+  ;;        {:main app.core
+  ;;         :asset-path "/js/dist/out"
+  ;;         :output-to "resources/public/js/dist/main.js"
+  ;;         :output-dir "resources/public/js/dist/out"
+  ;;         :source-map-timestamp true
+  ;;         :optimizations :none
+  ;;         :pretty-print true
+
+  ;;         $override
+  ;;         #zou/when-prod
+  ;;         {:optimizations :advanced
+  ;;          :pretty-print false}}}
+  }}

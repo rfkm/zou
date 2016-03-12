@@ -8,22 +8,20 @@
 (un/import-vars [figwheel-sidecar.components.css-watcher css-watcher])
 (un/import-vars [figwheel-sidecar.system cljs-repl])
 
-(defn- extract-build-conf [{:keys [builds]}]
+(defn- extract-build-conf [builds]
   (:all-builds (conf/prep-config (conf/config {:cljsbuild {:builds builds}}))))
 
-(defrecord Figwheel [enable-server? figwheel-options all-builds build-ids cljsbuild]
+(defrecord Figwheel [figwheel-options all-builds build-ids builds]
   c/Lifecycle
   (start [this]
-    (if enable-server?
-      (assoc this
-             :figwheel-system
-             (-> (conf/prep-config {:figwheel-options figwheel-options
-                                    :all-builds (concat all-builds
-                                                        (extract-build-conf cljsbuild))
-                                    :build-ids build-ids})
-                 sys/create-figwheel-system
-                 c/start))
-      this))
+    (assoc this
+           :figwheel-system
+           (-> (conf/prep-config {:figwheel-options figwheel-options
+                                  :all-builds (concat all-builds
+                                                      (extract-build-conf builds))
+                                  :build-ids build-ids})
+               sys/create-figwheel-system
+               c/start)))
   (stop [this]
     (when-let [fs (:figwheel-system this)]
       (c/stop fs))
@@ -42,7 +40,4 @@
            all-builds))))
 
 (defn figwheel [conf]
-  (let [enable-server? (:enable-server? conf true)
-        conf {:figwheel (dissoc conf :enable-server?)}]
-    (map->Figwheel (assoc (conf/config conf)
-                          :enable-server? enable-server?))))
+  (map->Figwheel (conf/config {:figwheel conf})))

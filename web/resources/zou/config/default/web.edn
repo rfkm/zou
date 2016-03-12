@@ -53,20 +53,13 @@
   :zou/optionals {:asset-providers :tag.asset-provider}
   :zou/tags [:tag.route-provider :tag.view-model]}
 
- :cljsbuild
+ :cljs-builds
+ {}
+
+ :cljs-asset-provider
  {:zou/constructor zou.web.asset/map->CljsbuildAssetProvider
   :zou/tags [:tag.asset-provider]
-  :builds [;; {:id "example",
-           ;;  :path "/js/dist/example.js"
-           ;;  :source-paths ["src-cljs"]
-           ;;  :figwheel true
-           ;;  :build-options
-           ;;  {:main zou-demo.core
-           ;;   :asset-path "/js/dist/out"
-           ;;   :output-to "resources/public/js/dist/example.js"
-           ;;   :output-dir "resources/public/js/dist/out"
-           ;;   :source-map-timestamp true}}
-           ]}
+  :zou/optionals {:builds :cljs-builds}}
 
  :sassc-builds
  [;; {:src        "src-scss/main.scss"
