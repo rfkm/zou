@@ -16,7 +16,7 @@ So you need to add our repository to your `project.clj`:
   :repositories [["zou-repo"
                   {:url "https://s3.amazonaws.com/zou-repo"}]]
   :dependencies [...
-                 [zou "0.1.0-alpha3"]
+                 [zou "0.1.0-alpha4-SNAPSHOT"]
                  ...]
   ...)
 ```
