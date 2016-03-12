@@ -1,6 +1,6 @@
 {:builds
  {:main
-  {:path "/js/dist/main.js"
+  {:serve-path "/js/dist/main.js"
    :source-paths ["src" "src-cljs"]
    :figwheel true
    :compiler

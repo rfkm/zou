@@ -53,7 +53,7 @@
                    (map (fn [[k v]] (assoc v :id k)) builds)
                    builds)]
       (map (fn [v]
-             {:name (:path v)
+             {:name (:serve-path v)
               :type :javascript
               :src (or (get-in v [:build-options :output-to])
                        (get-in v [:compiler :output-to]))})
