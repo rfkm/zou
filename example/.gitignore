@@ -10,3 +10,4 @@ pom.xml.asc
 /resources/public/js/dist
 /resources/public/css/dist
 /.repl
+/out

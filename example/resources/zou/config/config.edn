@@ -64,9 +64,9 @@
          }
 
         :view-helper
-        {:zou/constructor zou-todo.view-helper/map->ViewHelper
+        {:zou/constructor  zou-todo.view-helper/map->ViewHelper
          :zou/dependencies {:router :router}
-         :zou/tags [:tag.view-model]}
+         :zou/tags         [:tag.view-model]}
 
         ;; DB
         ;; ---------------------------------------------------------------------
@@ -78,8 +78,8 @@
 
          ;; The complete list of available options is here:
          ;;  https://github.com/tomekw/hikari-cp/
-         :adapter "h2"
-         :url "jdbc:h2:./zou_todo"
+         :adapter  "h2"
+         :url      "jdbc:h2:./zou_todo"
          }
 
         ;; MIDDLEWARE
@@ -89,20 +89,31 @@
 
         ;; CLJS
         ;; ---------------------------------------------------------------------
-        :cljsbuild
-        {$include "./cljsbuild.edn"}
+        :cljs-builds
+        {:main {:serve-path   "/js/main.js"
+                :source-paths ["src" "src-cljs"]
+                :figwheel     true
+                :compiler     {:output-to     "target/cljs/public/js/main.js"
+                               :main          zou-todo.core
+                               :optimizations :advanced
+
+                               $override
+                               #zou/when-dev
+                               {:optimizations :none
+                                :pretty-print  true
+                                :asset-path    "/js/out"}}}}
 
         :figwheel
-        {:http-server-root "public" ;; default
-         :server-port 3449          ;; default
+        {:http-server-root  "public" ;; default
+         :server-port       3449     ;; default
          :open-file-command "emacsclient"}
 
         ;; SASSC
         ;; ---------------------------------------------------------------------
         :sassc-builds
         [{:src        "src-scss/main.scss"
-          :output-to  "resources/public/css/dist/main.css"
-          :style      "compressed" ; nested/expanded/compact/compressed
+          :output-to  "target/sassc/public/css/main.css"
+          :style      "compressed"    ; nested/expanded/compact/compressed
           :load-path  "src-scss"
-          :serve-path "/css/dist/main.css" ; for asset provider
+          :serve-path "/css/main.css" ; for asset provider
           }]}}
