@@ -65,6 +65,12 @@
                                         "zou-version \""
                                         "\""
                                         "version"]
+                                       "bump-example-zou-version"
+                                       ["file-replace"
+                                        "example/project.clj"
+                                        "zou-version \""
+                                        "\""
+                                        "version"]
                                        "bump-readme-zou-version"
                                        ["file-replace"
                                         "README.md"
@@ -87,10 +93,13 @@
                   ["modules++" "change" "version" "leiningen.release/bump-version" "release"]
                   ["bump-template-zou-version"]
                   ["bump-readme-zou-version"]
+                  ["bump-example-zou-version"]
                   ["vcs" "commit"]
                   ["vcs" "tag"]
                   ["with-profile" "+deploy" "modules++" "deploy"]
                   ["modules++" "change" "version" "leiningen.release/bump-version"]
                   ["bump-template-zou-version"]
+                  ["bump-readme-zou-version"]
+                  ["bump-example-zou-version"]
                   ["vcs" "commit"]
                   ["vcs" "push"]])
