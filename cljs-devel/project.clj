@@ -1,6 +1,7 @@
 (defproject zou/cljs-devel "0.1.0-alpha4-SNAPSHOT"
   :dependencies [[zou/common :version]
                  [zou/web :version]
+                 [org.clojure/tools.nrepl "0.2.12"]
                  [figwheel-sidecar "0.5.0-6" :exclusions [com.stuartsierra/component
                                                           org.clojure/clojurescript]]]
   :plugins [[lein-modules "0.3.11"]]
