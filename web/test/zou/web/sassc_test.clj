@@ -46,7 +46,7 @@
                                                    :err "err"
                                                    :out "out"})
 
-        (log/logged? "Successfully compiled src.scss to out.css" :info) => true
+        (log/logged? #"Successfully compiled out.css in \d+\.\d+s\." :info) => true
         (log/logged? "err" :error) => true
         (log/logged? "out" :info) => true))
 
@@ -56,8 +56,7 @@
                       :output-to "out.css"}) => anything
         (provided
           (sh/sh "sassc" "src.scss" "out.css") => {:exit 1})
-
-        (log/logged? "Failed to compile") => true))
+        (log/logged? "Failed to compile out.css") => true))
 
     (fact "Show error message if sassc is missing"
       (log/with-test-logger

@@ -55,7 +55,7 @@
       (let [ret (apply sh/sh (cons (or (:sassc-cmd conf) "sassc") (gen-args conf)))]
         (if (= (:exit ret) 0)
           (log/infof "Successfully compiled %s in %.2fs." out (/ (- (System/nanoTime) start-time) 1e9))
-          (log/error "Failed to compile %s" out))
+          (log/errorf "Failed to compile %s" out))
         (when (seq (:err ret)) (log/errorn (:err ret)))
         (when (seq (:out ret)) (log/infon (:out ret)))))
     (catch java.io.IOException e
