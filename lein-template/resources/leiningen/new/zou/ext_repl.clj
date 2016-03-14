@@ -1,4 +1,4 @@
-(ns zou.ext.repl.{{namespace}}
+(ns zou.ext.{{namespace}}.repl
   (:require [zou.framework.ext-helper :as ext]))
 
 ;;; You can define repl functions here

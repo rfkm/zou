@@ -80,8 +80,19 @@
 
         ;; CLJS
         ;; ---------------------------------------------------------------------
-        :cljsbuild
-        {$include "./cljsbuild.edn"}
+        :cljs-builds
+        {:main {:serve-path   "/js/main.js"
+                :source-paths ["src-cljs"]
+                :figwheel     true
+                :compiler     {:output-to     "target/cljs/public/js/main.js"
+                               :main          {{namespace}}.core
+                               :optimizations :advanced
+
+                               $override
+                               #zou/when-dev
+                               {:optimizations :none
+                                :pretty-print  true
+                                :asset-path    "/js/out"}}}}
 
         :figwheel
         {:http-server-root "public" ;; default
@@ -93,14 +104,14 @@
         :sassc-builds
         [{{#scss?}}
          {:src        "src-scss/main.scss"
-          :output-to  "resources/public/css/dist/main.css"
+          :output-to  "target/sassc/public/css/main.css"
           :style      "compressed" ; nested/expanded/compact/compressed
           :load-path  "src-scss"
-          :serve-path "/css/dist/main.css" ; for asset provider
+          :serve-path "/css/main.css" ; for asset provider
           }{{/scss?}}{{#sass?}}
          {:src        "src-sass/main.sass"
-          :output-to  "resources/public/css/dist/main.css"
+          :output-to  "target/sassc/public/css/main.css"
           :style      "compressed" ; nested/expanded/compact/compressed
           :load-path  "src-sass"
-          :serve-path "/css/dist/main.css" ; for asset provider
+          :serve-path "/css/main.css" ; for asset provider
           }{{/sass?}}]{{/sassc?}}}}

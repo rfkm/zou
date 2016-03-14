@@ -118,8 +118,7 @@
       (update-in [:data] merge
                  {:cljs? true})
       (update-in [:templates] merge
-                 {"resources/zou/config/cljsbuild.edn" "cljsbuild.edn"
-                  "src-cljs/{{dirs}}/core.cljs"        "core.cljs"})))
+                 {"src-cljs/{{dirs}}/core.cljs"        "core.cljs"})))
 
 (defmethod apply-profile :enlive [_ name acc]
   (-> acc
