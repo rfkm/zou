@@ -29,4 +29,4 @@
 
  :container
  {:zou/constructor zou.framework.container.impl/new-default-container
-  $include #resource "zou/config/config.edn"}}
+  :spec #import #resource "zou/config/config.edn"}}

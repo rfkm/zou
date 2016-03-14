@@ -65,12 +65,12 @@
 
 (t/deftest default-entry-point-test
   (facts "DefaultEntryPoint"
-    (let [container (c/start (c.impl/new-default-container {:s {:a {}
-                                                                :b {}
-                                                                :foo {:zou/constructor map->FooTask
-                                                                      :zou/dependencies {:bar :bar}}
-                                                                :bar {:zou/constructor map->BarTask}
-                                                                :baz {:zou/constructor map->ContainerTask}}}))
+    (let [container (c/start (c.impl/new-default-container {:spec {:s {:a {}
+                                                                       :b {}
+                                                                       :foo {:zou/constructor map->FooTask
+                                                                             :zou/dependencies {:bar :bar}}
+                                                                       :bar {:zou/constructor map->BarTask}
+                                                                       :baz {:zou/constructor map->ContainerTask}}}}))
           ep (c/start (sut/map->DefaultEntryPoint {:exit-process? false
                                                    :container container}))]
       (fact "If no subtask is specified, start the whole system."

@@ -35,7 +35,7 @@
 (defn- narrow-system [system ks]
   (c/map->SystemMap (select-keys system (reduce into #{} (map #(transitive-dep-keys system %) ks)))))
 
-(defrecord DefaultContainer []
+(defrecord DefaultContainer [spec]
   proto/ComponentContainer
   (get-component [this component-key]
     (get-component (::system this) component-key))
@@ -61,9 +61,7 @@
   c/Lifecycle
   (start [this]
     (let [sys-a (::system this (atom nil))]
-      (reset! sys-a (-> this
-                        (dissoc ::system)
-                        c/build-nested-system-map))
+      (reset! sys-a (c/build-nested-system-map spec))
       (assoc this ::system sys-a)))
   (stop [this]
     (proto/stop-system this)))
@@ -75,5 +73,5 @@
     (.write writer (str " " k)))
   (.write writer ">"))
 
-(defn new-default-container [system-spec]
-  (map->DefaultContainer (assoc system-spec ::system (atom {}))))
+(defn new-default-container [conf]
+  (map->DefaultContainer (assoc conf ::system (atom {}))))
