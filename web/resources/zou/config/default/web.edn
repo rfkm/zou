@@ -10,13 +10,18 @@
                      :middlewares :middlewares
                      :request-logger :request-logger}}
 
- :router
+ :bidi-router
  {:zou/constructor  zou.web.routing.bidi/map->BidiRouter
   :zou/dependencies {:route-providers :tag.route-provider
                      :handler-finder :handler-finder
                      :middlewares :routed-middlewares}
   :zou/tags         [:tag.cargo :tag.view-model]
   :dynamic?         #zou/when-dev true}
+
+ :router
+ {:zou/constructor zou.web.routing.context/map->ContextAwareRouter
+  :zou/dependencies {:request-context :request-context
+                     :parent-router :bidi-router}}
 
  :handler-finder
  {:zou/constructor zou.finder.rule/map->RuleBasedFinder
