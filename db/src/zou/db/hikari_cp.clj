@@ -7,7 +7,9 @@
   (start [this]
     (if datasource
       this
-      (map->HikariCP {:datasource (pool/make-datasource (into {} this))})))
+      (map->HikariCP {:datasource (pool/make-datasource (into {} this))
+                      :spec (into {} this) ; keep config map for reference
+                      })))
   (stop [this]
     (when (instance? java.io.Closeable datasource)
       (.close datasource))
