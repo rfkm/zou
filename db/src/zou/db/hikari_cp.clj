@@ -2,13 +2,13 @@
   (:require [hikari-cp.core :as pool]
             [zou.component :as c]))
 
-(defrecord HikariCP []
+(defrecord HikariCP [datasource]
   c/Lifecycle
-  (start [{:keys [datasource] :as this}]
+  (start [this]
     (if datasource
       this
-      (assoc this :datasource (pool/make-datasource (into {} this)))))
-  (stop [{:keys [datasource] :as this}]
+      (map->HikariCP {:datasource (pool/make-datasource (into {} this))})))
+  (stop [this]
     (when (instance? java.io.Closeable datasource)
       (.close datasource))
     (assoc this :datasource nil)))
