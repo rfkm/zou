@@ -5,11 +5,9 @@
             [zou.framework.bootstrap.impl :as sut]
             [zou.framework.entrypoint.proto :as ep]))
 
-(t/deftest make-core-test
+(t/deftest make-bootstrap-test
   (fact
-    (type (sut/new-bootstrap-system ..conf..)) => zou.framework.bootstrap.impl.DefaultBootstrapSystem
-    (provided
-     (c/build-system-map ..conf..) => {})))
+    (type (sut/new-bootstrap-system {})) => zou.framework.bootstrap.impl.DefaultBootstrapSystem))
 
 (t/deftest lifecycle-test
   (facts
@@ -17,13 +15,13 @@
       (let [sys (sut/map->DefaultBootstrapSystem {:entrypoint (reify ep/EntryPoint)})]
         (c/start sys) => ..started..
         (provided
-         (c/start-system sys) => ..started..)))
+          (c/start-system sys) => ..started..)))
 
     (fact
       (let [sys (sut/map->DefaultBootstrapSystem {})]
         (c/stop sys) => ..stopped..
         (provided
-         (c/stop-system sys) => ..stopped..)))
+          (c/stop-system sys) => ..stopped..)))
 
     (fact
       (let [sys (sut/map->DefaultBootstrapSystem {})]

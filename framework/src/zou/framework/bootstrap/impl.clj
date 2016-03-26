@@ -26,4 +26,4 @@
   "Create an instance of DefaultBootstrapSystem with the given config
   map."
   [conf]
-  (map->DefaultBootstrapSystem (c/build-system-map conf)))
+  (map->DefaultBootstrapSystem conf))

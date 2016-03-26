@@ -144,7 +144,18 @@
       (t/is (= (c/dependencies (:tag1 sys))
                {:c1 :c1}))
       (t/is (= (c/dependencies (:tag2 sys))
-               {:c1' :c1})))))
+               {:c1' :c1}))))
+
+  (t/testing "constructor is swappable"
+    (let [sys (sut/build-system-map {:zou/constructor map->FooComponent
+                                     :c1 :c1'})]
+      (t/is (instance? FooComponent sys))
+      (t/is (= (:c1 sys) :c1')))
+
+    ;; default
+    (let [sys (sut/build-system-map {:c1 :c1'})]
+      (t/is (instance? com.stuartsierra.component.SystemMap sys))
+      (t/is (= (:c1 sys) :c1')))))
 
 (t/deftest flatten-nested-system-map-test
   (t/is

@@ -22,22 +22,20 @@
                    (assoc-in acc [t a] c))) {})))
 
 (defn- extract-ctor-def [conf-entry]
-  (if-let [ctor (and (map? conf-entry)
-                     (:zou/constructor conf-entry))]
+  (when-let [ctor (and (map? conf-entry)
+                       (:zou/constructor conf-entry))]
     (cond
       #?@(:clj [(symbol? ctor) (un/resolve-var ctor)])
       (fn? ctor) ctor
       :else (throw (ex-info #?(:clj "Constructor must be a function or resoluble symbol"
                                :cljs "Constructor must be a function")
-                            {:ctor ctor})))
-    ;; default ctor
-    identity))
+                            {:ctor ctor})))))
 
 (defn- extract-deps [conf-entry]
   (:zou/dependencies conf-entry))
 
 (defn- system-ctors [conf]
-  (u/map-vals extract-ctor-def conf))
+  (u/map-vals (some-fn extract-ctor-def (constantly identity)) conf))
 
 (defn- translate-tags [conf]
   (u/map-vals
@@ -116,7 +114,9 @@
 (defn build-system-map
   ([conf] (build-system-map conf (keys conf)))
   ([conf subsystem-keys]
-   (let [conf    (preprocess-conf conf)
+   (let [ctor    (or (extract-ctor-def conf) component/map->SystemMap)
+         conf    (dissoc conf :zou/constructor)
+         conf    (preprocess-conf conf)
          conf    (extract-subsystem-conf conf subsystem-keys)
          ctors   (system-ctors conf)
          confs   (system-confs conf)
@@ -125,7 +125,7 @@
                            (assoc acc k (ctor (get confs k))))
                          {}
                          ctors)]
-     (-> (component/map->SystemMap sys-map)
+     (-> (ctor sys-map)
          (component/system-using deps)))))
 
 (defn- munge-system-key [system-key]
