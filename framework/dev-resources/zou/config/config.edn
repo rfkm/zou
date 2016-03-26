@@ -1,14 +1,19 @@
-{$let [base {:counter
-             {:zou/constructor zou.test-component/map->Counter
-              :step            10
-              :zou/tags        [:tag.timer-handler]}
+{$let     [base {:counter
+                 {:zou/constructor zou.test-component/map->Counter
+                  :step            10
+                  :zou/tags        [:tag.timer-handler]}
 
-             :timer
-             {:zou/constructor  zou.test-component/map->Timer
-              :zou/dependencies {:handlers :tag.timer-handler}
-              :interval         1000}}]
- :app {$include #- base}
- :app2 {$include #- base
-        :counter {:step 100}
-        :timer {:interval 3000}
-        :task {:zou/constructor zou.test-task/map->MyTask}}}
+                 :timer
+                 {:zou/constructor  zou.test-component/map->Timer
+                  :zou/dependencies {:handlers :tag.timer-handler}
+                  :interval         1000}}]
+ $include #- base
+ :counter {:step 1}
+ :timer   {:interval 2000}
+ :subsys  {$include         #- base
+           :zou/constructor zou.component/build-system-map}
+ :subsys2 {$include         #- base
+           :zou/constructor zou.component/build-system-map
+           :counter         {:step 100}
+           :timer           {:interval 3000}}
+ :task    {:zou/constructor zou.test-task/map->MyTask}}

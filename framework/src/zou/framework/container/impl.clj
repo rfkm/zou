@@ -61,7 +61,7 @@
   c/Lifecycle
   (start [this]
     (let [sys-a (::system this (atom nil))]
-      (reset! sys-a (c/build-nested-system-map spec))
+      (reset! sys-a (c/build-system-map spec))
       (assoc this ::system sys-a)))
   (stop [this]
     (proto/stop-system this)))

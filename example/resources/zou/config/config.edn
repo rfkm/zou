@@ -1,119 +1,119 @@
-{:main {$include
-        [#resource "zou/config/default/web.edn"
-         #resource "zou/config/default/hikari_cp.edn"
-         #resource "zou/config/default/figwheel.edn"]
+{$include
+ [#resource "zou/config/default/web.edn"
+  #resource "zou/config/default/hikari_cp.edn"
+  #resource "zou/config/default/figwheel.edn"]
 
-        ;; SERVER
-        ;; ---------------------------------------------------------------------
-        :server
-        {:port 3000}
+ ;; SERVER
+ ;; ---------------------------------------------------------------------
+ :server
+ {:port 3000}
 
-        ;; ROUTING
-        ;; ---------------------------------------------------------------------
-        :routes
-        {:spec zou-todo.routes/main-routes
+ ;; ROUTING
+ ;; ---------------------------------------------------------------------
+ :routes
+ {:spec zou-todo.routes/main-routes
 
-         ;; Another way to define routes:
-         ;; :spec ["" {""       :main/homepage
-         ;;             "/posts" {""     :posts/index
-         ;;                       "/new" :posts/new}}]
-         }
+  ;; Another way to define routes:
+  ;; :spec ["" {""       :main/homepage
+  ;;             "/posts" {""     :posts/index
+  ;;                       "/new" :posts/new}}]
+  }
 
-        ;; :another-routes
-        ;; {:zou/constructor zou.web.routing.route-provider/map->SimpleRouteProvider
-        ;;  :zou/tags        [:tag.route-provider]
-        ;;  :spec            ["/foo" {"" :hello-world
-        ;;                            ["greet/" :people] :greet}]
-        ;;  }
+ ;; :another-routes
+ ;; {:zou/constructor zou.web.routing.route-provider/map->SimpleRouteProvider
+ ;;  :zou/tags        [:tag.route-provider]
+ ;;  :spec            ["/foo" {"" :hello-world
+ ;;                            ["greet/" :people] :greet}]
+ ;;  }
 
-        :handler-finder
-        {
-         ;; Define how to translate route-id to Ring handler function.
-         :mappings {
-                    ;; :index -> #'zou-todo.handler/index
-                    ;; :foo/index -> #'zou-todo.handler.foo/index
-                    nil :zou-todo.handler
+ :handler-finder
+ {
+  ;; Define how to translate route-id to Ring handler function.
+  :mappings {
+             ;; :index -> #'zou-todo.handler/index
+             ;; :foo/index -> #'zou-todo.handler.foo/index
+             nil :zou-todo.handler
 
-                    ;; :foo/index -> :zou-todo.foo/index
-                    ;; :baz/index -> :zou-todo.foo.baz/index
-                    ;; :foo :zou-todo.foo
-                    }}
+             ;; :foo/index -> :zou-todo.foo/index
+             ;; :baz/index -> :zou-todo.foo.baz/index
+             ;; :foo :zou-todo.foo
+             }}
 
-        ;; VIEW
-        ;; ---------------------------------------------------------------------
-        :view-finder
-        {
-         ;; Define how to translate view-id to view function. See
-         ;; :handler-finder also.
-         :mappings {nil :zou-todo.view}}
-        ;; :view-finder
-        ;; {:zou/constructor zou.web.view.stencil/map->StencilFinder
-        ;;  :base-path "templates"
-        ;;  :ttl #zou/when-dev 0}
+ ;; VIEW
+ ;; ---------------------------------------------------------------------
+ :view-finder
+ {
+  ;; Define how to translate view-id to view function. See
+  ;; :handler-finder also.
+  :mappings {nil :zou-todo.view}}
+ ;; :view-finder
+ ;; {:zou/constructor zou.web.view.stencil/map->StencilFinder
+ ;;  :base-path "templates"
+ ;;  :ttl #zou/when-dev 0}
 
-        ;; :view
-        ;; {:zou/constructor zou.web.view.stencil/map->StencilView
-        ;;  :base-path "templates"
-        ;;  :ttl #zou/when-dev 0}
+ ;; :view
+ ;; {:zou/constructor zou.web.view.stencil/map->StencilView
+ ;;  :base-path "templates"
+ ;;  :ttl #zou/when-dev 0}
 
-        :static-view-model
-        {
-         ;; This view model will be merged into other ones and available in a
-         ;; view function.
-         :app-name "Zou ToDo"
-         }
+ :static-view-model
+ {
+  ;; This view model will be merged into other ones and available in a
+  ;; view function.
+  :app-name "Zou ToDo"
+  }
 
-        :view-helper
-        {:zou/constructor  zou-todo.view-helper/map->ViewHelper
-         :zou/dependencies {:router :router}
-         :zou/tags         [:tag.view-model]}
+ :view-helper
+ {:zou/constructor  zou-todo.view-helper/map->ViewHelper
+  :zou/dependencies {:router :router}
+  :zou/tags         [:tag.view-model]}
 
-        ;; DB
-        ;; ---------------------------------------------------------------------
-        :hikari-cp
-        {
-         ;; Any components tagged with :tag.crago will be injected
-         ;; into Ring's request map.
-         :zou/tags [[:tag.cargo :db]]
+ ;; DB
+ ;; ---------------------------------------------------------------------
+ :hikari-cp
+ {
+  ;; Any components tagged with :tag.crago will be injected
+  ;; into Ring's request map.
+  :zou/tags [[:tag.cargo :db]]
 
-         ;; The complete list of available options is here:
-         ;;  https://github.com/tomekw/hikari-cp/
-         :adapter  "h2"
-         :url      "jdbc:h2:./zou_todo"
-         }
+  ;; The complete list of available options is here:
+  ;;  https://github.com/tomekw/hikari-cp/
+  :adapter  "h2"
+  :url      "jdbc:h2:./zou_todo"
+  }
 
-        ;; MIDDLEWARE
-        ;; ---------------------------------------------------------------------
-        :prone
-        {:app-namespaces [zou zou-todo]}
+ ;; MIDDLEWARE
+ ;; ---------------------------------------------------------------------
+ :prone
+ {:app-namespaces [zou zou-todo]}
 
-        ;; CLJS
-        ;; ---------------------------------------------------------------------
-        :cljs-builds
-        {:main {:serve-path   "/js/main.js"
-                :source-paths ["src" "src-cljs"]
-                :figwheel     true
-                :compiler     {:output-to     "target/cljs/public/js/main.js"
-                               :main          zou-todo.core
-                               :optimizations :advanced
+ ;; CLJS
+ ;; ---------------------------------------------------------------------
+ :cljs-builds
+ {:main {:serve-path   "/js/main.js"
+         :source-paths ["src" "src-cljs"]
+         :figwheel     true
+         :compiler     {:output-to     "target/cljs/public/js/main.js"
+                        :main          zou-todo.core
+                        :optimizations :advanced
 
-                               $override
-                               #zou/when-dev
-                               {:optimizations :none
-                                :pretty-print  true
-                                :asset-path    "/js/out"}}}}
+                        $override
+                        #zou/when-dev
+                        {:optimizations :none
+                         :pretty-print  true
+                         :asset-path    "/js/out"}}}}
 
-        :figwheel
-        {:http-server-root  "public" ;; default
-         :server-port       3449     ;; default
-         :open-file-command "emacsclient"}
+ :figwheel
+ {:http-server-root  "public" ;; default
+  :server-port       3449     ;; default
+  :open-file-command "emacsclient"}
 
-        ;; SASSC
-        ;; ---------------------------------------------------------------------
-        :sassc-builds
-        [{:src        "src-scss/main.scss"
-          :output-to  "target/sassc/public/css/main.css"
-          :style      "compressed"    ; nested/expanded/compact/compressed
-          :load-path  "src-scss"
-          :serve-path "/css/main.css" ; for asset provider
-          }]}}
+ ;; SASSC
+ ;; ---------------------------------------------------------------------
+ :sassc-builds
+ [{:src        "src-scss/main.scss"
+   :output-to  "target/sassc/public/css/main.css"
+   :style      "compressed"    ; nested/expanded/compact/compressed
+   :load-path  "src-scss"
+   :serve-path "/css/main.css" ; for asset provider
+   }]}

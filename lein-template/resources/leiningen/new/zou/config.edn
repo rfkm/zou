@@ -1,117 +1,117 @@
-{:main {$include
-        [#resource "zou/config/default/web.edn"{{#db?}}
-         #resource "zou/config/default/hikari_cp.edn"{{/db?}}{{#cljs?}}
-         #resource "zou/config/default/figwheel.edn"{{/cljs?}}]
+{$include
+ [#resource "zou/config/default/web.edn"{{#db?}}
+  #resource "zou/config/default/hikari_cp.edn"{{/db?}}{{#cljs?}}
+  #resource "zou/config/default/figwheel.edn"{{/cljs?}}]
 
-        ;; SERVER
-        ;; ---------------------------------------------------------------------
-        :server
-        {:port 3000}
+ ;; SERVER
+ ;; ---------------------------------------------------------------------
+ :server
+ {:port 3000}
 
-        ;; ROUTING
-        ;; ---------------------------------------------------------------------
-        :routes
-        {:spec {{namespace}}.routes/main-routes
+ ;; ROUTING
+ ;; ---------------------------------------------------------------------
+ :routes
+ {:spec {{namespace}}.routes/main-routes
 
-         ;; Another way to define routes:
-         ;; :spec ["" {""       :main/homepage
-         ;;             "/posts" {""     :posts/index
-         ;;                       "/new" :posts/new}}]
-         }
+  ;; Another way to define routes:
+  ;; :spec ["" {""       :main/homepage
+  ;;             "/posts" {""     :posts/index
+  ;;                       "/new" :posts/new}}]
+  }
 
-        ;; :another-routes
-        ;; {:zou/constructor zou.web.routing.route-provider/map->SimpleRouteProvider
-        ;;  :zou/tags        [:tag.route-provider]
-        ;;  :spec            ["/foo" {"" :hello-world
-        ;;                            ["greet/" :people] :greet}]
-        ;;  }
+ ;; :another-routes
+ ;; {:zou/constructor zou.web.routing.route-provider/map->SimpleRouteProvider
+ ;;  :zou/tags        [:tag.route-provider]
+ ;;  :spec            ["/foo" {"" :hello-world
+ ;;                            ["greet/" :people] :greet}]
+ ;;  }
 
-        :handler-finder
-        {
-         ;; Define how to translate route-id to Ring handler function.
-         :mappings {
-                    ;; :index -> #'{{namespace}}.handler/index
-                    ;; :foo/index -> #'{{namespace}}.handler.foo/index
-                    nil :{{namespace}}.handler
+ :handler-finder
+ {
+  ;; Define how to translate route-id to Ring handler function.
+  :mappings {
+             ;; :index -> #'{{namespace}}.handler/index
+             ;; :foo/index -> #'{{namespace}}.handler.foo/index
+             nil :{{namespace}}.handler
 
-                    ;; :foo/index -> :{{namespace}}.foo/index
-                    ;; :baz/index -> :{{namespace}}.foo.baz/index
-                    ;; :foo :{{namespace}}.foo
-                    }}
+             ;; :foo/index -> :{{namespace}}.foo/index
+             ;; :baz/index -> :{{namespace}}.foo.baz/index
+             ;; :foo :{{namespace}}.foo
+             }}
 
-        ;; VIEW
-        ;; ---------------------------------------------------------------------
-        :view-finder
-        {
-         ;; Define how to translate view-id to view function. See
-         ;; :handler-finder also.
-         :mappings {nil :{{namespace}}.view}}
+ ;; VIEW
+ ;; ---------------------------------------------------------------------
+ :view-finder
+ {
+  ;; Define how to translate view-id to view function. See
+  ;; :handler-finder also.
+  :mappings {nil :{{namespace}}.view}}
 
-        :static-view-model
-        {
-         ;; This view model will be merged into other ones and available in a
-         ;; view function.
-         :app-name "{{name}}"}
+ :static-view-model
+ {
+  ;; This view model will be merged into other ones and available in a
+  ;; view function.
+  :app-name "{{name}}"}
 
-        :view-helper
-        {:zou/constructor {{namespace}}.view-helper/map->ViewHelper
-         :zou/dependencies {:router :router}
-         :zou/tags [:tag.view-model]}
+ :view-helper
+ {:zou/constructor {{namespace}}.view-helper/map->ViewHelper
+  :zou/dependencies {:router :router}
+  :zou/tags [:tag.view-model]}
 
-        {{#db?}}
-        ;; DB
-        ;; ---------------------------------------------------------------------
-        :hikari-cp
-        {
-         ;; Any components tagged with :tag.crago will be injected
-         ;; into Ring's request map.
-         :zou/tags [[:tag.cargo :db]]
+ {{#db?}}
+ ;; DB
+ ;; ---------------------------------------------------------------------
+ :hikari-cp
+ {
+  ;; Any components tagged with :tag.crago will be injected
+  ;; into Ring's request map.
+  :zou/tags [[:tag.cargo :db]]
 
-         ;; The complete list of available options is here:
-         ;;  https://github.com/tomekw/hikari-cp/
-         {{#dbspecs}}{{key}} {{& val}}
-         {{/dbspecs}}}
-        {{/db?}}
+  ;; The complete list of available options is here:
+  ;;  https://github.com/tomekw/hikari-cp/
+  {{#dbspecs}}{{key}} {{& val}}
+  {{/dbspecs}}}
+ {{/db?}}
 
-        ;; MIDDLEWARE
-        ;; ---------------------------------------------------------------------
-        :prone
-        {:app-namespaces [zou {{namespace}}]}{{#cljs?}}
+ ;; MIDDLEWARE
+ ;; ---------------------------------------------------------------------
+ :prone
+ {:app-namespaces [zou {{namespace}}]}{{#cljs?}}
 
-        ;; CLJS
-        ;; ---------------------------------------------------------------------
-        :cljs-builds
-        {:main {:serve-path   "/js/main.js"
-                :source-paths ["src-cljs"]
-                :figwheel     true
-                :compiler     {:output-to     "target/cljs/public/js/main.js"
-                               :main          {{namespace}}.core
-                               :optimizations :advanced
+ ;; CLJS
+ ;; ---------------------------------------------------------------------
+ :cljs-builds
+ {:main {:serve-path   "/js/main.js"
+         :source-paths ["src-cljs"]
+         :figwheel     true
+         :compiler     {:output-to     "target/cljs/public/js/main.js"
+                        :main          {{namespace}}.core
+                        :optimizations :advanced
 
-                               $override
-                               #zou/when-dev
-                               {:optimizations :none
-                                :pretty-print  true
-                                :asset-path    "/js/out"}}}}
+                        $override
+                        #zou/when-dev
+                        {:optimizations :none
+                         :pretty-print  true
+                         :asset-path    "/js/out"}}}}
 
-        :figwheel
-        {:http-server-root "public" ;; default
-         :server-port 3449          ;; default
-         :open-file-command "emacsclient"}{{/cljs?}}{{#sassc?}}
+ :figwheel
+ {:http-server-root "public" ;; default
+  :server-port 3449          ;; default
+  :open-file-command "emacsclient"}{{/cljs?}}{{#sassc?}}
 
-        ;; SASSC
-        ;; ---------------------------------------------------------------------
-        :sassc-builds
-        [{{#scss?}}
-         {:src        "src-scss/main.scss"
-          :output-to  "target/sassc/public/css/main.css"
-          :style      "compressed" ; nested/expanded/compact/compressed
-          :load-path  "src-scss"
-          :serve-path "/css/main.css" ; for asset provider
-          }{{/scss?}}{{#sass?}}
-         {:src        "src-sass/main.sass"
-          :output-to  "target/sassc/public/css/main.css"
-          :style      "compressed" ; nested/expanded/compact/compressed
-          :load-path  "src-sass"
-          :serve-path "/css/main.css" ; for asset provider
-          }{{/sass?}}]{{/sassc?}}}}
+ ;; SASSC
+ ;; ---------------------------------------------------------------------
+ :sassc-builds
+ [{{#scss?}}
+  {:src        "src-scss/main.scss"
+   :output-to  "target/sassc/public/css/main.css"
+   :style      "compressed" ; nested/expanded/compact/compressed
+   :load-path  "src-scss"
+   :serve-path "/css/main.css" ; for asset provider
+   }{{/scss?}}{{#sass?}}
+  {:src        "src-sass/main.sass"
+   :output-to  "target/sassc/public/css/main.css"
+   :style      "compressed" ; nested/expanded/compact/compressed
+   :load-path  "src-sass"
+   :serve-path "/css/main.css" ; for asset provider
+   }{{/sass?}}]{{/sassc?}}}
