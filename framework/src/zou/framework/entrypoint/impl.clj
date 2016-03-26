@@ -39,9 +39,10 @@
       (task/spec (get system task-component-key)))))
 
 (defn- assert-duplication [tasks]
-  (let [task-names (map task/task-name tasks)]
-    (when-not (apply distinct? task-names)
-      (throw (ex-info "Found duplicated task name" {:task-names task-names})))))
+  (when (seq tasks)
+    (let [task-names (map task/task-name tasks)]
+      (when-not (apply distinct? task-names)
+        (throw (ex-info "Found duplicated task name" {:task-names task-names}))))))
 
 (defn- container-aware-cmd-container [container t-container-key]
   (let [system (container/system container)

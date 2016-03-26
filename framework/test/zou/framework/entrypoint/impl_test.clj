@@ -92,4 +92,10 @@
 
         (get-in (proto/run ep ["foo"]) [:options :foo]) => nil
         (proto/run ep ["bar"]) => :bar-res
-        (:options (proto/run ep ["baz" "foo" "-p"])) => (contains {:parent-opt true})))))
+        (:options (proto/run ep ["baz" "foo" "-p"])) => (contains {:parent-opt true})))
+
+    (fact "It's ok even if there is no task."
+      (let [container (c/start (c.impl/new-default-container {:spec {:a {}}}))
+            ep (c/start (sut/map->DefaultEntryPoint {:exit-process? false
+                                                     :container container}))]
+        (proto/run ep []) => anything))))
