@@ -35,7 +35,7 @@
 (defn- narrow-system [system ks]
   (c/map->SystemMap (select-keys system (reduce into #{} (map #(transitive-dep-keys system %) ks)))))
 
-(defrecord DefaultContainer [spec]
+(defrecord StatefulContainer [spec]
   proto/ComponentContainer
   (get-component [this component-key]
     (get-component (::system this) component-key))
@@ -66,12 +66,12 @@
   (stop [this]
     (proto/stop-system this)))
 
-(defmethod print-method DefaultContainer
+(defmethod print-method StatefulContainer
   [container ^java.io.Writer writer]
-  (.write writer "#<DefaultContainer")
+  (.write writer "#<StatefulContainer")
   (doseq [k (proto/component-keys container)]
     (.write writer (str " " k)))
   (.write writer ">"))
 
-(defn new-default-container [conf]
-  (map->DefaultContainer (assoc conf ::system (atom {}))))
+(defn new-stateful-container [conf]
+  (map->StatefulContainer (assoc conf ::system (atom {}))))

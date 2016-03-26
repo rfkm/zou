@@ -65,12 +65,12 @@
 
 (t/deftest default-entry-point-test
   (facts "DefaultEntryPoint"
-    (let [container (c/start (c.impl/new-default-container {:spec {:a {}
-                                                                   :b {}
-                                                                   :foo {:zou/constructor map->FooTask
-                                                                         :zou/dependencies {:bar :bar}}
-                                                                   :bar {:zou/constructor map->BarTask}
-                                                                   :baz {:zou/constructor map->ContainerTask}}}))
+    (let [container (c/start (c.impl/new-stateful-container {:spec {:a {}
+                                                                    :b {}
+                                                                    :foo {:zou/constructor map->FooTask
+                                                                          :zou/dependencies {:bar :bar}}
+                                                                    :bar {:zou/constructor map->BarTask}
+                                                                    :baz {:zou/constructor map->ContainerTask}}}))
           ep (c/start (sut/map->DefaultEntryPoint {:exit-process? false
                                                    :container container}))]
       (fact "If no subtask is specified, start the whole system."
@@ -95,7 +95,7 @@
         (:options (proto/run ep ["baz" "foo" "-p"])) => (contains {:parent-opt true})))
 
     (fact "It's ok even if there is no task."
-      (let [container (c/start (c.impl/new-default-container {:spec {:a {}}}))
+      (let [container (c/start (c.impl/new-stateful-container {:spec {:a {}}}))
             ep (c/start (sut/map->DefaultEntryPoint {:exit-process? false
                                                      :container container}))]
         (proto/run ep []) => anything))))

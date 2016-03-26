@@ -28,5 +28,5 @@
                                :else false}}
 
  :container
- {:zou/constructor zou.framework.container.impl/new-default-container
+ {:zou/constructor zou.framework.container.impl/new-stateful-container
   :spec #import #resource "zou/config/config.edn"}}

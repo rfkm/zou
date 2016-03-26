@@ -14,7 +14,7 @@
 
 (t/deftest container-test
   (fact "container"
-    (let [new-container #(c/start (impl/new-default-container {:spec {:c {:zou/constructor map->Foo}}}))]
+    (let [new-container #(c/start (impl/new-stateful-container {:spec {:c {:zou/constructor map->Foo}}}))]
 
       ;; lifecycle test
       (fact "start"
