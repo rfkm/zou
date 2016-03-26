@@ -1,4 +1,4 @@
-(defproject zou/cljs-devel "0.1.0-alpha4"
+(defproject zou/cljs-devel "0.1.0-alpha5-SNAPSHOT"
   :dependencies [[zou/common :version]
                  [zou/web :version]
                  [org.clojure/tools.nrepl "0.2.12"]

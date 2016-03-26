@@ -1,4 +1,4 @@
-(defproject zou/db "0.1.0-alpha4"
+(defproject zou/db "0.1.0-alpha5-SNAPSHOT"
   :dependencies [[zou/common :version]
                  [zou/component :version]
                  [hikari-cp "1.6.1"]]
