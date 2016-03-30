@@ -39,4 +39,11 @@
       (bidi/routes am) => (just ["" (just [(just ["/foo.js" (just (bidi/tag fn? :foo))])])])
       ((-> (bidi/routes am) second first second :matched) {}) => ..res..
       (provided
-        (res/url-response src) => ..res..))))
+        (res/url-response src) => ..res..)))
+
+  (fact "AssetManager itself is also an asset provider."
+    (-> (sut/map->AssetManager {:asset-providers {:a (->TestProvider [..a1.. ..a2..])
+                                                  :b (->TestProvider [..b1.. ..b2..])}})
+        (aproto/assets))
+    =>
+    [..a1.. ..a2.. ..b1.. ..b2..]))

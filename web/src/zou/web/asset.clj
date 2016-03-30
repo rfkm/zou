@@ -39,7 +39,13 @@
                      (group-by :type)
                      (u/map-vals (partial map route-id)))]
       {:javascripts (:javascript specs [])
-       :stylesheets (:stylesheet specs [])})))
+       :stylesheets (:stylesheet specs [])}))
+
+  aproto/AssetsProvider
+  (assets [this]
+    (->> asset-providers
+         vals
+         (mapcat aproto/assets))))
 
 (defrecord StaticAssetProvider [specs]
   aproto/AssetsProvider
