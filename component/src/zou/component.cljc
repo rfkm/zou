@@ -4,6 +4,7 @@
             [com.stuartsierra.dependency :as dep]
             [zou.component.internal.util :as cu :include-macros true]
             [zou.component.parser :as p]
+            [zou.component.proto-ext :as pe]
             [zou.logging :as log :include-macros true]
             [zou.util :as u :include-macros true]
             [zou.util.namespace :as un :include-macros true]))
@@ -68,8 +69,10 @@
    (let [parsed (p/parse-system-config conf)]
      (->> (instantiate-components parsed)
           (instantiate-system parsed)
+          #?(:clj (pe/apply-protocol-extensions :instantiated))
           (apply-dependencies parsed)
           (apply-weak-dependencies parsed)
+          #?(:clj (pe/apply-protocol-extensions :injected))
           (u/?>> (not= subsystem-keys ::all)
                  (u/<- (narrow-system subsystem-keys)))))))
 

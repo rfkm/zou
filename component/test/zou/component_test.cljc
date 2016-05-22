@@ -1,6 +1,7 @@
 (ns zou.component-test
   (:require [com.stuartsierra.component :as c]
             [zou.component :as sut :include-macros true]
+            [zou.component.proto-ext :as pe]
             #?(:clj [clojure.test :as t]
                :cljs [cljs.test :as t :include-macros true]))
   #?(:clj (:import (clojure.lang ExceptionInfo))))
@@ -21,6 +22,20 @@
     (throw (ex-info "error" {:this this})))
   (stop [this]
     this))
+
+(defprotocol MyProtocolExtension
+  (inject-constant [this v]))
+
+(defmethod pe/apply-protocol-extension [MyProtocolExtension :instantiated] [system component-key _ _]
+  (update-in system [component-key] inject-constant :foo))
+
+(defrecord ProtocolExtensionComponent []
+  c/Lifecycle
+  (start [this] this)
+  (stop [this] this)
+  MyProtocolExtension
+  (inject-constant [this v]
+    (assoc this :constant v)))
 
 (defn new-stateful-component [_]
   (->StatefulComponent (atom [])))
@@ -78,7 +93,13 @@
     ;; default
     (let [sys (sut/build-system-map {:c1 :c1'})]
       (t/is (instance? com.stuartsierra.component.SystemMap sys))
-      (t/is (= (:c1 sys) :c1')))))
+      (t/is (= (:c1 sys) :c1'))))
+
+  #?(:clj
+     (t/testing "protocol extension"
+       (let [sys (sut/build-system-map {:pec {:zou/constructor map->ProtocolExtensionComponent
+                                              :a :a}})]
+         (t/is (= (get-in sys [:pec :constant]) :foo))))))
 
 (t/deftest with-component-test
   (let [c (new-stateful-component {})]
