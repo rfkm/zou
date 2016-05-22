@@ -2,182 +2,92 @@
   (:require [clojure.set :as set]
             [com.stuartsierra.component :as component]
             [com.stuartsierra.dependency :as dep]
+            [zou.component.internal.util :as cu :include-macros true]
+            [zou.component.parser :as p]
             [zou.logging :as log :include-macros true]
-            [zou.util :as u]
+            [zou.util :as u :include-macros true]
             [zou.util.namespace :as un :include-macros true]))
 
 #?(:clj (un/import-ns com.stuartsierra.component #{dependency-graph})
    :cljs (un/cljs-import-ns com.stuartsierra.component #{dependency-graph}))
 
-(defn- system-tags [conf]
-  (->> (for [[k cmp] conf
-             tag (:zou/tags cmp)]
-         [k tag])
-       (reduce (fn [acc [c t]]
-                 (let [[t a] (if (vector? t)
-                               t
-                               [t
-                                ;; Use the component name (without ns prefix) as an alias
-                                (keyword (name c))])]
-                   (assoc-in acc [t a] c))) {})))
+(defn- instantiate-components [parsed-config]
+  (reduce-kv (fn [components component-key {:keys [constructor config disabled]
+                                            :or   {constructor identity
+                                                   config      {}
+                                                   disabled    false}}]
+               (if disabled
+                 components
+                 (assoc components component-key (constructor config))))
+             {}
+             (:components parsed-config)))
 
-(defn- extract-ctor-def [conf-entry]
-  (when-let [ctor (and (map? conf-entry)
-                       (:zou/constructor conf-entry))]
-    (cond
-      #?@(:clj [(symbol? ctor) (un/resolve-var ctor)])
-      (fn? ctor) ctor
-      :else (throw (ex-info #?(:clj "Constructor must be a function or resoluble symbol"
-                               :cljs "Constructor must be a function")
-                            {:ctor ctor})))))
+(defn- instantiate-system [parsed-config components]
+  (let [ctor (cu/resolve-ctor (or (get-in parsed-config [:system :constructor])
+                                  component/map->SystemMap))]
+    (if (ifn? ctor)
+      (ctor components)
+      (throw (ex-info "System constructor is not callable"
+                      {:constructor ctor})))))
 
-(defn- extract-deps [conf-entry]
-  (:zou/dependencies conf-entry))
-
-(defn- system-ctors [conf]
-  (u/map-vals (some-fn extract-ctor-def (constantly identity)) conf))
-
-(defn- translate-tags [conf]
-  (u/map-vals
-   #(if (map? %) (dissoc % :zou/tags) %)
-   (u/deep-merge
-    conf
-    (u/map-vals (partial hash-map :zou/dependencies)
-                (system-tags conf)))))
-
-(defn- translate-dependants [conf]
-  (->> (for [[k cmp] conf
-             d (:zou/dependants cmp)]
-         [k d])
-       (reduce (fn [acc [comp-key [target alias]]]
-                 (assoc-in acc [target :zou/dependencies alias] comp-key))
-               conf)
-       (u/map-vals #(if (map? %) (dissoc % :zou/dependants) %))))
-
-(defn- translate-optionals [conf]
-  (u/map-vals (fn [cmp]
-                (if (map? cmp)
-                  (let [opts (:zou/optionals cmp)
-                        deps (:zou/dependencies cmp)]
-                    (-> cmp
-                        (dissoc :zou/optionals)
-                        (assoc :zou/dependencies
-                               (merge deps
-                                      (or (u/filter-vals #(contains? conf %) opts)
-                                          {})))))
-                  cmp)) conf))
-
-(defn- system-deps [conf]
-  (->> conf
-       (u/map-vals extract-deps)
+(defn- dependency-map [parsed-config]
+  (->> (:components parsed-config)
+       (u/map-vals :dependencies)
        (u/filter-vals identity)))
 
-(defn- remove-special-keys [m]
-  (if (map? m)
-    (u/remove-keys #(and (keyword? %)
-                         (= "zou" (namespace %)))
-                   m)
-    m))
+(defn- weak-dependency-map [parsed-config]
+  (->> (:components parsed-config)
+       (u/map-vals :weak-dependencies)
+       (u/filter-vals identity)))
 
-(defn- system-confs [conf]
-  (u/map-vals remove-special-keys conf))
+(defn- apply-dependencies [parsed-config system]
+  (component/system-using system (dependency-map parsed-config)))
 
-(defn- cleanup-conf [conf]
-  (->> conf
-       ;; omit falsy entries
-       (u/filter-vals identity)
-       ;; omit disabled components
-       (u/remove-vals (every-pred map? :zou/disabled))))
-
-(def ^:private preprocess-conf (comp translate-optionals
-                                     translate-dependants
-                                     translate-tags
-                                     cleanup-conf))
+(defn- apply-weak-dependencies [parsed-config system]
+  (->> (weak-dependency-map parsed-config)
+       (u/map-vals #(u/filter-vals (set (keys system)) %))
+       (component/system-using system)))
 
 (defn- dependency-keys [graph k]
   (filter #(dep/depends? graph k %) (dep/nodes graph)))
 
-(defn- dependency-graph [conf]
-  (let [deps-map (system-deps conf)]
-    (reduce-kv (fn [graph key deps]
-                 (reduce #(dep/depend %1 key %2)
-                         graph
-                         (vals deps)))
-               (dep/graph)
-               deps-map)))
-
-(defn extract-subsystem-conf [conf ks]
-  (let [conf  (preprocess-conf conf)
-        graph (dependency-graph conf)]
-    (select-keys conf (into ks (mapcat #(dependency-keys graph %) ks)))))
+(defn- narrow-system [system subsystem-keys]
+  (let [graph (component/dependency-graph system (keys system))
+        ks (into subsystem-keys
+                 (mapcat #(dependency-keys graph %) subsystem-keys))
+        ks-to-del (set/difference (set (keys system)) (set ks))]
+    (reduce (fn [system k] (dissoc system k)) system ks-to-del)))
 
 (defn build-system-map
-  ([conf] (build-system-map conf (keys conf)))
+  "Build a system from the given configuration map. If
+  `subsystem-keys` is given, the system will be narrowed to a system
+  that consists of components corresponding to the keys including
+  their dependencies."
+  ([conf] (build-system-map conf ::all))
   ([conf subsystem-keys]
-   (let [ctor    (or (extract-ctor-def conf) component/map->SystemMap)
-         conf    (dissoc conf :zou/constructor)
-         conf    (preprocess-conf conf)
-         conf    (extract-subsystem-conf conf subsystem-keys)
-         ctors   (system-ctors conf)
-         confs   (system-confs conf)
-         deps    (system-deps conf)
-         sys-map (reduce (fn [acc [k ctor]]
-                           (assoc acc k (ctor (get confs k))))
-                         {}
-                         ctors)]
-     (-> (ctor sys-map)
-         (component/system-using deps)))))
+   (let [parsed (p/parse-system-config conf)]
+     (->> (instantiate-components parsed)
+          (instantiate-system parsed)
+          (apply-dependencies parsed)
+          (apply-weak-dependencies parsed)
+          (u/?>> (not= subsystem-keys ::all)
+                 (u/<- (narrow-system subsystem-keys)))))))
 
-(defn- munge-system-key [system-key]
-  (if-let [ns (namespace system-key)]
-    (keyword (str ns \. (name system-key)))
-    system-key))
-
-(defn- qualify-component-key [system-key component-key]
-  (if (namespace component-key)
-    component-key                       ; already qualified
-    (keyword (name (munge-system-key system-key))
-             (name component-key))))
-
-(defn- qualify-component-spec [system-key spec]
-  (let [qualify (partial qualify-component-key system-key)]
-    (-> spec
-        (u/update-in-when [:zou/dependencies] (partial u/map-vals qualify))
-        (u/update-in-when [:zou/optionals] (partial u/map-vals qualify))
-        (u/update-in-when [:zou/dependants] (partial u/map-keys qualify))
-        (u/update-in-when [:zou/tags] (partial mapv #(cond
-                                                       (keyword? %) (qualify %)
-                                                       (vector? %)  (update % 0 qualify)
-                                                       :else        %))))))
-
-(defn flatten-nested-system-map [conf]
-  {:pre [(and (map? conf) (every? map? (map last conf)))]}
-  (into
-   {}
-   (for [[sys-key sys] conf
-         [cmp-key cmp] sys]
-     [(qualify-component-key sys-key cmp-key)
-      (qualify-component-spec sys-key cmp)])))
-
-(defn build-nested-system-map
-  ([conf]
-   (build-system-map (flatten-nested-system-map conf)))
-  ([conf subsystem-keys]
-   (build-system-map (flatten-nested-system-map conf) subsystem-keys)))
-
-(defn try-catch-all [try-fn catch-fn]
-  (try
-    (try-fn)
-    (catch #?(:cljs :default :clj Throwable) e
-      (catch-fn e))))
-
-(defmacro try-recovery [& body]
-  `(try-catch-all
+(defmacro try-recovery
+  "Evaluates `body`, that typically contains an expression that starts
+  a system, in a try expression. If an exception is thrown while
+  evaluating the expression, this tries to recover the system by
+  stopping it. There is no guarantee that the recovery phase will be
+  successfully done, and it depends on implementations of the
+  system (= components it has). To make your system safer, you should
+  ensure each life cycle method is idempotence."
+  [& body]
+  `(cu/try-catch-all
     (fn [] ~@body)
     (fn [e#]
       (log/warn "Failed to start system")
       (log/warn "Trying to gracefully stop corrupted system...")
-      (try-catch-all
+      (cu/try-catch-all
        (fn []
          (stop (:system (ex-data e#)))
          (log/warn "...succeeded"))
@@ -186,23 +96,23 @@
       (throw (ex-without-components e#)))))
 
 (defmacro with-component
-  [[s component] & body]
-  `(let [~s (try-recovery (start ~component))]
+  "Evaluates `body` with `sym` bound to the started `component`, and a
+  finally caluse that stops the `component`."
+  [[sym component] & body]
+  `(let [~sym (try-recovery (start ~component))]
      (try
        ~@body
        (finally
-         (stop ~s)))))
+         (stop ~sym)))))
 
 (defmacro with-system
-  [[s conf & subsystem-keys] & body]
-  `(with-component [~s (if (seq ~(vec subsystem-keys))
-                         (build-system-map ~conf ~(vec subsystem-keys))
-                         (build-system-map ~conf))]
-     ~@body))
-
-(defmacro with-nested-system
-  [[s conf & subsystem-keys] & body]
-  `(with-component [~s (if (seq ~(vec subsystem-keys))
-                         (build-nested-system-map ~conf ~(vec subsystem-keys))
-                         (build-nested-system-map ~conf))]
+  "Evaluates `body` with the `sym` bound to the started system created
+  from the given config map, and a finally clause that stops the
+  system. If `subsystem-keys` are given, the system will be narrowed
+  down to a subsystem that contains components corresponding to the
+  specified keys and their transitive dependencies."
+  [[sym conf & subsystem-keys] & body]
+  `(with-component [~sym (if (seq ~(vec subsystem-keys))
+                           (build-system-map ~conf ~(vec subsystem-keys))
+                           (build-system-map ~conf))]
      ~@body))

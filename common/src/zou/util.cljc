@@ -42,6 +42,14 @@
     (deref ref)
     ref))
 
+(defn weak-assoc-in
+  "Similar to assoc-in, except does only when (get-in m ks) returns
+  falsy value."
+  [m ks v]
+  (if (get-in m ks)
+    m
+    (assoc-in m ks v)))
+
 #?(:clj
    (defn crc32-hex [s]
      (let [c (java.util.zip.CRC32.)]
