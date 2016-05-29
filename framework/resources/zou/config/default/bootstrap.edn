@@ -23,10 +23,10 @@
 
  :entrypoint
  {:zou/constructor  zou.framework.entrypoint.impl/map->DefaultEntryPoint
-  :zou/dependencies {:container   :container}
+  :zou/dependencies {:container :container}
   :exit-process?    #zou/cond {:prod true
                                :else false}}
 
  :container
  {:zou/constructor zou.framework.container.impl/new-stateful-container
-  :spec #import #resource "zou/config/config.edn"}}
+  :spec {}}}

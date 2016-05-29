@@ -5,4 +5,7 @@
  {:prefix []}
 
  :logging
- {:console true}}
+ {:console true}
+
+ :container
+ {:spec #import "./config.edn"}}

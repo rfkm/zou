@@ -5,4 +5,7 @@
  {:prefixes []}
 
  :logging
- {:overrides {"zou-todo" :debug}}}
+ {:overrides {"zou-todo" :debug}}
+
+ :container
+ {:spec #import "./config.edn"}}
