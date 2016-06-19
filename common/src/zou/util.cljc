@@ -50,6 +50,14 @@
     m
     (assoc-in m ks v)))
 
+(defn weak-assoc
+  "Similar to assoc, except does only when (get m k) returns
+  falsy value."
+  [m k v]
+  (if (get m k)
+    m
+    (assoc m k v)))
+
 #?(:clj
    (defn crc32-hex [s]
      (let [c (java.util.zip.CRC32.)]

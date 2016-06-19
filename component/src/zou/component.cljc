@@ -4,6 +4,7 @@
             [com.stuartsierra.dependency :as dep]
             [zou.component.internal.util :as cu :include-macros true]
             [zou.component.parser :as p]
+            [zou.component.parser.scanner]
             [zou.component.proto-ext :as pe]
             [zou.logging :as log :include-macros true]
             [zou.util :as u :include-macros true]
@@ -119,3 +120,107 @@
                            (build-system-map ~conf ~(vec subsystem-keys))
                            (build-system-map ~conf))]
      ~@body))
+
+#?(:clj
+   ;; TODO: CLJS support?
+   (do
+     (defn- guess-ctor [klass]
+       (->> (.split (.getName klass) "\\.")
+            last
+            (str "map->")
+            symbol
+            (ns-resolve *ns*)))
+
+     (defn- extract-ctor [v]
+       (if (var? v)
+         v
+         (or (and (class? v)
+                  (guess-ctor v))
+             (throw
+              (ex-info
+               (str
+                "Couldn't find a consturctor. "
+                "You can only specify a defrecord or defn expression.")
+               {})))))
+
+     (defn- extract-deps [prefix defrecord-decl]
+       (let [params (when (= (name (first defrecord-decl)) "defrecord")
+                      (nth defrecord-decl 2))]
+         (when (vector? params)
+           (->> params
+                (map (fn [sym]
+                       (let [dep (->> (meta sym)
+                                      keys
+                                      (filter #(or (= (name prefix) (namespace %))
+                                                   (= prefix %))))]
+                         (when (> (count dep) 1)
+                           (throw (ex-info "Multiple dep keys were found" {:dep-keys dep})))
+                         (when (seq dep)
+                           (let [dep-key (first dep)
+                                 dep-name (if (= prefix dep-key)
+                                            (keyword sym)
+                                            (keyword (name dep-key)))]
+                             [(keyword sym) dep-name])))))
+                (filter identity)
+                (into {})))))
+
+     (def ^:private +component-macro-props+
+       #{:name :constructor
+         :tags :dependencies :optionals :dependants
+         :disabled})
+
+     (defmacro component
+       "A utility macro to attach component metadata to a constructor
+  guessed from a defrecord/defn expression. Using the specified name,
+  other components can refer the component defined by this macro as a
+  dependency. If defrecord is wrapped with the macro, its constructor
+  will be assumed to be map->RecordName. Also, by attaching metadata
+  to a parameter of defrecord, you can specify which component will be
+  injected.
+
+  Examples:
+    (component
+      :dependencies {:dep :another-component}
+      (defn new-my-component [{:keys [dep]}]
+        ...))
+
+    (component my-foo  ;; <- Naming the component :my-foo
+      :dependencies {:dep :another-component}
+      (defrecord Foo [dep]
+        ...))
+
+    (component
+      (defrecord Foo [;; A component named foo will be injected to :foo
+                      ^:dep foo
+
+                      ;; A component named jdbc will be injected to :db
+                      ^:dep/jdbc db
+
+                      ;; A component named opt will be injected to :opt
+                      ;; as an weak dependency
+                      ^:dep? opt
+
+                      ;; A component named jdbc will be injected to :opt2
+                      ;; as an optional dependency
+                      ^:dep?/jdbc opt2]))"
+       {:arglists '([name? (prop-key prop-val) * defrecord-or-defn])
+        :style/indent :defn}
+       [& args]
+       (let [[id & args] (if (symbol? (first args))
+                           args
+                           (cons nil args))
+             kvs (apply hash-map (butlast args))
+             kvs (if-let [unknown-keys (seq (remove +component-macro-props+ (keys kvs)))]
+                   (throw (ex-info
+                           (str "Unknown property key(s): " unknown-keys)
+                           {:unknown-keys unknown-keys}))
+                   (u/filter-keys +component-macro-props+ (apply hash-map (butlast args))))
+             kvs (if id (assoc kvs :name (keyword (name id))) kvs)
+             cmp (last args)
+             kvs (update kvs :dependencies merge (extract-deps :dep cmp))
+             kvs (update kvs :optionals merge (extract-deps :dep? cmp))
+             meta-map (u/map-keys #(keyword "zou" (name %)) kvs)]
+         `(let [cmp# ~cmp
+                ctor# (#'extract-ctor cmp#)]
+            (alter-meta! ctor# assoc :zou/component ~meta-map)
+            cmp#)))))

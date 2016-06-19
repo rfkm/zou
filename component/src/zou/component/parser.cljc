@@ -34,6 +34,22 @@
 (defn parse-system-config [conf]
   (reduce-kv parse-system-config-entry {} conf))
 
+(defn component-spec [var]
+  (:zou/component (meta var)))
+
+(defn- gen-component-key [var]
+  (->> (meta var)
+       ((juxt :ns :name))
+       (map str)
+       (apply keyword)))
+
+(defn var->spec [var]
+  (let [spec (component-spec var)
+        key  (keyword (:zou/name spec
+                                 (gen-component-key var)))
+        spec (dissoc spec :zou/name)]
+    [key (u/weak-assoc spec :zou/constructor var)]))
+
 
 ;;;
 ;;; impls
@@ -44,7 +60,14 @@
 
 (defmethod parse-component-config-entry :zou/constructor
   [component-key acc _ v]
-  (assoc-in acc [:components component-key :constructor] (cu/resolve-ctor v)))
+  (let [ctor (cu/resolve-ctor v)
+        [_ spec] (if (var? ctor)
+                   (var->spec ctor)
+                   [nil {}])
+        spec (dissoc spec :zou/constructor)]
+    (-> acc
+        (parse-component-config component-key spec)
+        (assoc-in [:components component-key :constructor] ctor))))
 
 (defmethod parse-component-config-entry :zou/dependencies
   [component-key acc _ deps]

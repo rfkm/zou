@@ -144,3 +144,31 @@
       (catch ExceptionInfo e
         ;; Ensure `dep` is stopped
         (t/is (= (-> sys :dep :state deref set) #{:started :stopped}))))))
+
+#?(:clj (do
+          (sut/component
+            (defn foo []))
+
+          (sut/component mybar
+            (defn bar []))
+
+          (sut/component
+            :dependencies {:foo' :foo}
+            (defn baz [{:keys [foo']}]))
+
+          (sut/component qux
+            :dependencies {:foo' :foo}
+            (defrecord Qux [foo' ^:dep bar ^:dep/baz' baz ^:dep?/opt opt]))
+
+          (t/deftest component-macro-test
+            (t/is (= (:zou/component (meta #'foo)) {:zou/dependencies nil
+                                                    :zou/optionals nil}))
+            (t/is (true? (contains? (meta #'foo) :zou/component)))
+            (t/is (= (get-in (meta #'bar) [:zou/component :zou/name]) :mybar))
+            (t/is (= (get-in (meta #'baz) [:zou/component]) {:zou/dependencies {:foo' :foo}
+                                                             :zou/optionals nil}))
+            (t/is (= (get-in (meta #'map->Qux) [:zou/component]) {:zou/name :qux
+                                                                  :zou/dependencies {:foo' :foo
+                                                                                     :bar :bar
+                                                                                     :baz :baz'}
+                                                                  :zou/optionals {:opt :opt}})))))
