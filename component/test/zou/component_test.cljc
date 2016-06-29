@@ -103,7 +103,7 @@
   (t/testing "constructor is swappable"
     (let [sys (sut/build-system-map {:zou/constructor map->FooComponent
                                      :c1 :c1'})]
-      #_(t/is (instance? FooComponent sys))
+      (t/is (instance? FooComponent sys))
       (t/is (= (:c1 sys) :c1')))
 
     ;; default
