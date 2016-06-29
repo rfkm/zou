@@ -91,10 +91,15 @@
                                           :zou/optionals {:c2 :c2}
                                           :zou/dependants {:c2 :c2}
                                           :zou/tags [:tag.foo]
-                                          :zou/disabled true}})]
+                                          :zou/disabled true}
+                                     :c4 {:zou/disabled false}
+                                     :c5 {:zou/disabled nil}
+                                     :c6 {:zou/disabled 1}})]
       (t/is (= sys
                (c/map->SystemMap {:c1 {}
-                                  :c2 {}})))
+                                  :c2 {}
+                                  :c4 {}
+                                  :c5 {}})))
       (t/is (= (c/dependencies (:c2 sys))
                {:c1 :c1}))
       (t/is (= (c/dependencies (:c3 sys))

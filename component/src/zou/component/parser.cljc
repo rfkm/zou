@@ -29,7 +29,7 @@
     acc))
 
 (defmethod parse-system-config-entry ::default [acc k v]
-  (if (and (map? v) (some? (:zou/disabled v)))
+  (if (and (map? v) (:zou/disabled v))
     acc
     (parse-component-config acc k v)))
 
@@ -96,3 +96,7 @@
                         component-key))
             acc
             tags)))
+
+(defmethod parse-component-config-entry :zou/disabled [component-key acc _ _]
+  ;; Doesn't handle `:zou/disabled` key here. See `parse-system-config-entry`
+  acc)
