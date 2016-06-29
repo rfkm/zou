@@ -29,7 +29,9 @@
     acc))
 
 (defmethod parse-system-config-entry ::default [acc k v]
-  (parse-component-config acc k v))
+  (if (and (map? v) (some? (:zou/disabled v)))
+    acc
+    (parse-component-config acc k v)))
 
 (defn parse-system-config [conf]
   (reduce-kv parse-system-config-entry {} conf))
@@ -94,7 +96,3 @@
                         component-key))
             acc
             tags)))
-
-(defmethod parse-component-config-entry :zou/disabled
-  [component-key acc _ disabled?]
-  (assoc-in acc [:components component-key :disabled] (some? disabled?)))
