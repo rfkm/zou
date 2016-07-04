@@ -97,7 +97,9 @@
  :figwheel
  {:http-server-root "public" ;; default
   :server-port 3449          ;; default
-  :open-file-command "emacsclient"}{{/cljs?}}{{#sassc?}}
+  :open-file-command "emacsclient"{{#sassc?}}
+  :css-dirs ["resources/public/css"
+             "target/sassc/public/css/main.css"]{{/sassc?}}}{{/cljs?}}{{#sassc?}}
 
  ;; SASSC
  ;; ---------------------------------------------------------------------
