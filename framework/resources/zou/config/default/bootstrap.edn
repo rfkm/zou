@@ -1,11 +1,14 @@
 {:zou/constructor zou.framework.bootstrap.impl/new-bootstrap-system
+
  :auto-load
  {:zou/constructor   zou.framework.core.auto-loader/map->AutoLoader
+  :zou/tags          [:tag.core-extension]
   :prefixes          []
   :exclude-classpath "test"}
 
  :logging
  {:zou/constructor zou.framework.core.logging/map->LoggingConfigurator
+  :zou/tags        [:tag.core-extension]
   :bridge-out?     #zou/cond {:dev  true
                               :else false}
   :level           #zou/if-prod [:info :debug]
@@ -19,7 +22,7 @@
  :extension-loader
  {:zou/constructor  zou.framework.core.ext-loader/map->ExtensionLoader
   :zou/dependencies {:logging :logging} ; should load after logging setup
-  }
+  :zou/tags         [:tag.core-extension]}
 
  :entrypoint
  {:zou/constructor  zou.framework.entrypoint.impl/map->DefaultEntryPoint
@@ -28,5 +31,6 @@
                                :else false}}
 
  :container
- {:zou/constructor zou.framework.container.impl/new-stateful-container
-  :spec {}}}
+ {:zou/constructor  zou.framework.container.impl/new-stateful-container
+  :zou/dependencies {:core-extensions :tag.core-extension}
+  :spec             {}}}
