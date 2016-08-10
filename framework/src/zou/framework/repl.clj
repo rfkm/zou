@@ -50,5 +50,15 @@
 
 (def $ #'system)
 
+(defmacro $-> [component-key & forms]
+  `(-> (system ~component-key)
+       ~@forms))
+
+(defmacro $->> [component-key & forms]
+  `(->> (system ~component-key)
+        ~@forms))
+
 (defn inject-util-to-core []
-  (ns/inject clojure.core $))
+  (ns/inject clojure.core $)
+  (ns/inject clojure.core $->)
+  (ns/inject clojure.core $->>))
