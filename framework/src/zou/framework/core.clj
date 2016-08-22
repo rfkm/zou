@@ -57,5 +57,5 @@
   `#'zou.framework.core/+bootstrap-system+`."
   []
   (when (nil? +bootstrap-system+)
-    (throw (RuntimeException. "Failed to find a bootstrap system. Did you forget to start it?")))
+    (throw (IllegalStateException. "Failed to find a bootstrap system. Did you forget to start it?")))
   +bootstrap-system+)
