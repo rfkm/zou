@@ -51,11 +51,10 @@
   (ep/run bootstrap-system args))
 
 (defn bootstrap-system
-  "Return the current instance of bootstrap system. You should use this only
-  for debugging purposes or for convenience during development. Note
-  that this works only when the instance is bound to
+  "Return the current instance of bootstrap system. Return nil if
+  there is no instance. You should use this only for debugging
+  purposes or for convenience during development. Note that this works
+  only when the instance is bound to
   `#'zou.framework.core/+bootstrap-system+`."
   []
-  (when (nil? +bootstrap-system+)
-    (throw (IllegalStateException. "Failed to find a bootstrap system. Did you forget to start it?")))
   +bootstrap-system+)
