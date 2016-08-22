@@ -56,6 +56,6 @@
   that this works only when the instance is bound to
   `#'zou.framework.core/+bootstrap-system+`."
   []
-  (when-not (bound? #'+bootstrap-system+)
+  (when (nil? +bootstrap-system+)
     (throw (RuntimeException. "Failed to find a bootstrap system. Did you forget to start it?")))
   +bootstrap-system+)
