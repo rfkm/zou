@@ -189,7 +189,7 @@
  :webjars
  {:zou/constructor zou.web.middleware/webjars
   :zou/tags        [:tag.middleware]
-  :prefix          "assets"}
+  :prefix          "/assets"}
 
  :container
  {:zou/constructor zou.web.middleware.container/map->Container
