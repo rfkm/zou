@@ -8,7 +8,7 @@
 (def reload-tag :zou/reload)
 
 (defn wrap-reload-ns [handler {:keys [ns-finder-fn]
-                               :or {:ns-finder-fn all-ns}}]
+                               :or {ns-finder-fn all-ns}}]
   (fn [req]
     (doseq [ns (ns-finder-fn)]
       (log/debug "Reloading:" (ns-name ns))
