@@ -5,7 +5,7 @@ machine:
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 dependencies:
   pre:
-    - yes | lein upgrade
+    - yes | lein upgrade 2.6.1
   override:
     - lein modules install
     - lein with-profile +coverage deps
