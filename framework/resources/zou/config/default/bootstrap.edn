@@ -11,6 +11,9 @@
   :zou/tags        [:tag.core-extension]
   :bridge-out?     #zou/cond {:dev  true
                               :else false}
+  ;; Whether to install a pretty printer for exceptions.
+  ;; Note that once the printer is installed, you cannot uninstall it during the session.
+  :pretty?         true
   :level           #zou/if-prod [:info :debug]
   :console         "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%5p) [%15.15t] %cyan(%-30.30logger{29}) : %m%n"
   :overrides       {"org.quartz.simpl.RAMJobStore"           :warn

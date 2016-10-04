@@ -140,13 +140,14 @@
      (defn start-logging!
        ([]
         (start-logging! {:level :info :console true}))
-       ([conf]
-        (pretty/install-pretty-logging)
-        (pretty/install-uncaught-exception-handler)
+       ([{:keys [pretty?] :as conf}]
+        (when pretty?
+          (pretty/install-pretty-logging)
+          (pretty/install-uncaught-exception-handler))
 
         ;; HACK: Prevent logback config set by unilog from being overwritten by wunderboss.
         (set-logback-dummy-file)
-        (unilog/start-logging! conf)))
+        (unilog/start-logging! (dissoc conf :pretty?))))
 
 
      ;; test utils
