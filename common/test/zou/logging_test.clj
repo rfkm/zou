@@ -6,12 +6,20 @@
             [zou.logging :as sut]))
 
 (t/deftest logging-test
-  (facts "staet-logging!"
-    (sut/start-logging! ..conf..) => anything
-    (provided
-      (pretty/install-pretty-logging) => anything
-      (pretty/install-uncaught-exception-handler) => anything
-      (unilog/start-logging! ..conf..) => anything)))
+  (facts "start-logging!"
+    (fact "with pretty printer"
+      (sut/start-logging! {:foo :bar :pretty? true}) => anything
+      (provided
+        (pretty/install-pretty-logging) => anything
+        (pretty/install-uncaught-exception-handler) => anything
+        (unilog/start-logging! {:foo :bar}) => anything))
+
+    (fact "without pretty printer"
+      (sut/start-logging! {:foo :bar :pretty? false}) => anything
+      (provided
+        (pretty/install-pretty-logging) => irrelevant :times 0
+        (pretty/install-uncaught-exception-handler) => irrelevant :times 0
+        (unilog/start-logging! {:foo :bar}) => anything))))
 
 (t/deftest test-logger-test
   (fact
