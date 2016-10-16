@@ -18,8 +18,8 @@
   (c/with-component [db (sut/map->HikariCP {:adapter "h2"
                                             :url "jdbc:h2:mem:test"})]
     (jdbc/execute! db [(jdbc/create-table-ddl :user
-                                              [:id :int "PRIMARY KEY"]
-                                              [:name "varchar(255)"])])
+                                              [[:id :int "PRIMARY KEY"]
+                                               [:name "varchar(255)"]])])
 
     (try
       @(m/mlet [_ (tx/task db (fn [db]
@@ -36,8 +36,8 @@
   (c/with-component [db (sut/map->HikariCP {:adapter "h2"
                                             :url "jdbc:h2:mem:test"})]
     (jdbc/execute! db [(jdbc/create-table-ddl :user
-                                              [:id :int "PRIMARY KEY"]
-                                              [:name "varchar(255)"])])
+                                              [[:id :int "PRIMARY KEY"]
+                                               [:name "varchar(255)"]])])
     (try
       @(m/mlet [_ (tx/task db (fn [db]
                                 (jdbc/insert! db :user {:id 1 :name "foo"})))

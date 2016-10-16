@@ -77,8 +77,6 @@
 (def context
   (reify
     p/Context
-    (-get-level [_]
-      ctx/+level-default+)
 
     p/Applicative
     (-pure [_ v]

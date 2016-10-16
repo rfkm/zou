@@ -19,8 +19,8 @@
                         :plugins        [[rfkm/lein-cloverage "1.0.9-SNAPSHOT"]
                                          [lein-exec "0.3.6"]]
                         :dependencies   [[zou/devel :version]
-                                         [cheshire "5.5.0"]
-                                         [org.clojure/tools.cli "0.3.3"]]}
+                                         [cheshire "5.6.3"]
+                                         [org.clojure/tools.cli "0.3.5"]]}
              :deploy   {:deploy-repositories [["zou-repo" {:url        "s3p://zou-repo/"
                                                            :username   [:gpg :env/aws_access_key_id]
                                                            :passphrase [:gpg :env/aws_secret_access_key]}]
@@ -29,7 +29,7 @@
                         :plugins             [[s3-wagon-private "1.2.0"]]}
              :cljs-test {:source-paths   ~(subdir "src")
                          :test-paths     ~(subdir "test")
-                         :plugins [[lein-doo "0.1.6"]]
+                         :plugins [[lein-doo "0.1.7"]]
                          :cljsbuild {:builds [{:id "test"
                                                :source-paths ~(vec (concat
                                                                     (subdir "src")
@@ -38,19 +38,19 @@
                                                :compiler {:output-to "resources/public/js/dist/testable.js"
                                                           :main zou.cljs.runner
                                                           :optimizations :none}}]}}
-             :dev      {:dependencies [[org.clojure/clojurescript "1.7.228" :exclusions [org.clojure/tools.reader]]
+             :dev      {:dependencies [[org.clojure/clojurescript "1.9.229" :exclusions [org.clojure/tools.reader]]
                                        [midje "1.8.3"]
                                        [org.clojure/clojure "1.8.0"]
-                                       [clj-http "2.1.0"]
+                                       [clj-http "3.3.0"]
                                        [ring/ring-mock "0.3.0"]
-                                       [org.clojure/java.jdbc "0.4.2"]
-                                       [org.postgresql/postgresql "9.4.1207"]
-                                       [com.h2database/h2 "1.4.191"]
+                                       [org.clojure/java.jdbc "0.6.1"]
+                                       [org.postgresql/postgresql "9.4.1211"]
+                                       [com.h2database/h2 "1.4.192"]
                                        [enlive "1.1.6"]
                                        [hiccup "1.0.5"]
                                        [stencil "0.5.0"]
-                                       [selmer "1.0.0"]]
-                        :plugins      [[lein-midje "3.2"]
+                                       [selmer "1.10.0"]]
+                        :plugins      [[lein-midje "3.2.1"]
                                        [lein-file-replace "0.1.0"]]
                         :env          {:zou-env "dev"}
                         :aliases      {"coverage" ["with-profile" "+coverage" "do"
