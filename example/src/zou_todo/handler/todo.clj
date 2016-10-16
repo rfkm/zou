@@ -1,7 +1,6 @@
 (ns zou-todo.handler.todo
   (:refer-clojure :exclude [update])
-  (:require [zou.specter :as s]
-            [zou.web.handler :as h]
+  (:require [zou.web.handler :as h]
             [zou.web.response :as res]
             [zou.web.routing :as r]))
 
@@ -25,22 +24,28 @@
       res/ok
       res/html))
 
-(h/defhandler update [$router task-id title]
+(defn- update-db-by-task-id! [task-id f]
   (swap! db (fn [old]
-              (s/setval [s/ALL #(= (:id %) task-id) :title] title old)))
+              (filter identity
+                      (reduce (fn [acc m]
+                                (if (= (:id m) task-id)
+                                  (f m)
+                                  m))
+                              []
+                              old)))))
+
+(h/defhandler update [$router task-id title]
+  (update-db-by-task-id! task-id #(assoc % :title title))
   (res/see-other (r/href $router :todo/index)))
 
 (h/defhandler done [$router task-id]
-  (swap! db (fn [old]
-              (s/setval [s/ALL #(= (:id %) task-id) :done?] true old)))
+  (update-db-by-task-id! task-id #(assoc % :done? true))
   (res/see-other (r/href $router :todo/index)))
 
 (h/defhandler undone [$router task-id]
-  (swap! db (fn [old]
-              (s/setval [s/ALL #(= (:id %) task-id) :done?] false old)))
+  (update-db-by-task-id! task-id #(assoc % :done? false))
   (res/see-other (r/href $router :todo/index)))
 
 (h/defhandler delete [$router task-id]
-  (swap! db (fn [old]
-              (remove #(= (:id %) task-id) old)))
+  (update-db-by-task-id! task-id (constantly nil))
   (res/see-other (r/href $router :todo/index)))
