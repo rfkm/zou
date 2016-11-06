@@ -8,18 +8,25 @@
 (un/import-vars [figwheel-sidecar.components.css-watcher css-watcher])
 (un/import-vars [figwheel-sidecar.system cljs-repl])
 
-(defn- extract-build-conf [builds]
-  (:all-builds (conf/prep-config (conf/config {:cljsbuild {:builds builds}}))))
+(defn ->figwheel-config-source [conf]
+  (reify conf/ConfigSource
+    (-config-data [_]
+      (conf/map->FigwheelConfigData
+       {:data
+        ;; XXX: relax the validation to allow our extra option keys (e.g. :serve-path).
+        (assoc conf :validate-config :ignore-unknown-keys)}))))
 
-(defrecord Figwheel [figwheel-options all-builds build-ids builds]
+(defn ->config-data [conf]
+  (conf/config-source->prepped-figwheel-internal (->figwheel-config-source (into {} conf))))
+
+(defrecord Figwheel [builds
+                     ;; & ks <-- any other figwheel options are acceptable
+                     ]
   c/Lifecycle
   (start [this]
     (assoc this
            :figwheel-system
-           (-> (conf/prep-config {:figwheel-options figwheel-options
-                                  :all-builds (concat all-builds
-                                                      (extract-build-conf builds))
-                                  :build-ids build-ids})
+           (-> (->config-data this)
                sys/create-figwheel-system
                c/start)))
   (stop [this]
@@ -29,15 +36,12 @@
 
   aproto/AssetsProvider
   (assets [this]
-    (let [all-builds (if (map? all-builds)
-                       (map (fn [[k v]] (assoc v :id k)) all-builds)
-                       all-builds)]
-      (map (fn [v]
-             {:name (:serve-path v)
-              :type :javascript
-              :src (or (get-in v [:build-options :output-to])
-                       (get-in v [:compiler :output-to]))})
-           all-builds))))
+    (map (fn [v]
+           {:name (:serve-path v)
+            :type :javascript
+            :src  (or (get-in v [:build-options :output-to])
+                      (get-in v [:compiler :output-to]))})
+         (conf/all-builds (->config-data this)))))
 
 (defn figwheel [conf]
-  (map->Figwheel (conf/config {:figwheel conf})))
+  (map->Figwheel conf))
