@@ -7,7 +7,7 @@
                   :exclusions [org.jboss.logging/jboss-logging]] ; for suppressing pedantic warning
                  [ring/ring-core "1.5.0" :exclusions [org.clojure/tools.reader]]
                  [ring/ring-defaults "0.2.1"]
-                 [ring/ring-devel "1.5.0"]
+                 [ring/ring-devel "1.5.1"]
                  [metosin/ring-http-response "0.8.0"]
                  [ring-logger "0.7.6"]
                  [ring.middleware.conditional "0.2.0"]
