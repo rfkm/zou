@@ -19,7 +19,7 @@
                         :plugins        [[rfkm/lein-cloverage "1.0.9-SNAPSHOT"]
                                          [lein-exec "0.3.6"]]
                         :dependencies   [[zou/devel :version]
-                                         [cheshire "5.6.3"]
+                                         [cheshire "5.7.1"]
                                          [org.clojure/tools.cli "0.3.5"]]}
              :deploy   {:deploy-repositories [["zou-repo" {:url        "s3p://zou-repo/"
                                                            :username   [:gpg :env/aws_access_key_id]
@@ -41,15 +41,15 @@
              :dev      {:dependencies [[org.clojure/clojurescript "1.9.229" :exclusions [org.clojure/tools.reader]]
                                        [midje "1.8.3"]
                                        [org.clojure/clojure "1.8.0"]
-                                       [clj-http "3.3.0"]
+                                       [clj-http "3.6.1"]
                                        [ring/ring-mock "0.3.0"]
                                        [org.clojure/java.jdbc "0.6.1"]
-                                       [org.postgresql/postgresql "9.4.1211"]
-                                       [com.h2database/h2 "1.4.192"]
+                                       [org.postgresql/postgresql "42.1.1"]
+                                       [com.h2database/h2 "1.4.196"]
                                        [enlive "1.1.6"]
                                        [hiccup "1.0.5"]
                                        [stencil "0.5.0"]
-                                       [selmer "1.10.0"]]
+                                       [selmer "1.10.7"]]
                         :plugins      [[lein-midje "3.2.1"]
                                        [lein-file-replace "0.1.0"]]
                         :env          {:zou-env "dev"}
