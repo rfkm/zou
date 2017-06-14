@@ -64,12 +64,12 @@
                opts))
 
 (defn read-config [file]
-  (b/read-config file
-                 {:shorthand? true
-                  :readers {'zou/when-dev when-dev-reader
-                            'zou/when-prod when-prod-reader
-                            'zou/when-test when-test-reader
-                            'zou/if-dev if-dev-reader
-                            'zou/if-prod if-prod-reader
-                            'zou/if-test if-test-reader
-                            'zou/cond env-cond-reader}}))
+  (b/read-file file
+               {:shorthand? true
+                :readers {'zou/when-dev when-dev-reader
+                          'zou/when-prod when-prod-reader
+                          'zou/when-test when-test-reader
+                          'zou/if-dev if-dev-reader
+                          'zou/if-prod if-prod-reader
+                          'zou/if-test if-test-reader
+                          'zou/cond env-cond-reader}}))
