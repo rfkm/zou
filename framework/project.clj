@@ -2,7 +2,7 @@
   :dependencies [[zou/common :version]
                  [zou/component :version]
                  [zou/lib :version]
-                 [rkworks/baum "0.3.0"]
+                 [rkworks/baum "0.4.0"]
                  [environ "1.1.0"]
                  [org.clojure/tools.cli "0.3.5"]
                  [org.clojure/tools.namespace "0.2.11"]]

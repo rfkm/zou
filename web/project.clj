@@ -4,8 +4,8 @@
                  [zou/lib :version]
                  [org.immutant/web "2.1.5"]
                  [org.projectodd.wunderboss/wunderboss-core "0.12.2"
-                  :exclusions [org.jboss.logging/jboss-logging]] ; for suppressing pedantic warning
-                 [ring/ring-core "1.5.0" :exclusions [org.clojure/tools.reader]]
+                  :exclusions [org.jboss.logging/jboss-logging ch.qos.logback/logback-classic]] ; for suppressing pedantic warning
+                 [ring/ring-core "1.5.1" :exclusions [org.clojure/tools.reader]]
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-devel "1.5.1"]
                  [metosin/ring-http-response "0.8.0"]
