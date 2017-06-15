@@ -1,4 +1,4 @@
-(def modules ["common" "component" "lib" "framework" "web" "db" "cljs-devel" "devel"])
+(def modules ["common" "component" "lib" "framework" "web" "db" "extra" "cljs-devel" "devel"])
 (def modules+tpl (conj modules "lein-template"))
 (def modules+tpl+parent (conj modules+tpl "."))
 
@@ -10,7 +10,8 @@
                  [zou/lib :version]
                  [zou/framework :version]
                  [zou/web :version :exclusions [org.apache.commons/commons-compress]]
-                 [zou/db :version]]
+                 [zou/db :version]
+                 [zou/extra :version]]
   :plugins [[lein-modules "0.3.11"]]
   :profiles {:coverage {:source-paths   ~(subdir "src")
                         :test-paths     ~(subdir "test")
@@ -49,7 +50,8 @@
                                        [enlive "1.1.6"]
                                        [hiccup "1.0.5"]
                                        [stencil "0.5.0"]
-                                       [selmer "1.10.7"]]
+                                       [selmer "1.10.7"]
+                                       [ragtime "0.7.1"]]
                         :plugins      [[lein-midje "3.2.1"]
                                        [lein-file-replace "0.1.0"]]
                         :env          {:zou-env "dev"}
