@@ -5,5 +5,5 @@
                  [inflections "0.13.0"]]
   :plugins [[lein-modules "0.3.11"]]
   :profiles
-  {:provided {:dependencies [[ragtime "0.7.1"]]}
-   :dev {:resource-paths ["dev-resources"]}})
+  {:dev {:dependencies [[zou/framework :version]]}
+   :provided {:dependencies [[ragtime "0.7.1"]]}})

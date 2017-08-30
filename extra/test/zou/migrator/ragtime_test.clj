@@ -1,22 +1,31 @@
 (ns zou.migrator.ragtime-test
   (:require [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
             [clojure.test :as t]
             [zou.component :as c]
-            [zou.migrator.ragtime :as sut]))
+            [zou.framework.bootstrap :as boot]
+            [zou.framework.entrypoint.proto :as ep]
+            [zou.logging :as log]
+            [zou.migrator.ragtime :as sut])
+  (:import java.nio.file.Files))
 
-(def h2db-dir "/tmp/h2-zou.migrator.ragtime")
-(def h2db-file (str h2db-dir "/h2db.sql"))
+(def empty-file-attrs (into-array java.nio.file.attribute.FileAttribute []))
+
+(def h2db-file (Files/createTempFile "h2db-" ".sql" empty-file-attrs))
+
+(defn log [_ op id]
+  (case op
+    :up (log/info "Applying" id)
+    :down (log/info "Rolling back" id)))
 
 (def test-conf
-  {:db (str "jdbc:h2:" h2db-file)
+  {:db (str "jdbc:h2:" (str h2db-file))
    :ragtime {:zou/constructor 'zou.migrator.ragtime/new-ragtime
              :zou/dependencies {:db :db}
              :migrations-path "migrations"
              :style :edn
              :strategy #'ragtime.strategy/raise-error
-             :reporter #'ragtime.reporter/print}})
+             :reporter #'log}})
 
 (defn setup [migrations]
   (c/with-system [sys test-conf]
@@ -27,17 +36,13 @@
     migrations))
 
 (defn teardown [migrations]
-  (letfn [(delete-recur [func f]
-            (when (.isDirectory f)
-              (doseq [f' (.listFiles f)]
-                (func func f')))
-            (io/delete-file f))]
-    (delete-recur delete-recur (io/file h2db-dir)))
+  (c/with-system [sys test-conf]
+    (jdbc/execute! (:db sys) "drop all objects;"))
   (doseq [edn @migrations]
     (io/delete-file edn)))
 
 (reset-meta! *ns* {})
-(t/use-fixtures :once
+(t/use-fixtures :each
   (fn [f]
     (let [migrations (atom [])]
       (setup migrations)
@@ -50,19 +55,34 @@
        (filter #(re-matches #"^TEST_\d+$" %))
        (into #{})))
 
-(t/deftest ragtime-component-test
+(t/deftest validate-component-state-test
+  (t/testing "validate-component-state"
+    (c/with-system [sys test-conf]
+      (t/is (= (sut/validate-component-state (:ragtime sys))
+               (:ragtime sys)))
+
+      (t/is (thrown?
+             clojure.lang.ExceptionInfo
+             (= (-> (:ragtime sys)
+                    (dissoc :index)
+                    sut/validate-component-state)
+                (:ragtime sys)))))))
+
+(t/deftest migrate-test
   (t/testing "migrate"
     (c/with-system [sys test-conf]
       (t/is (= (find-test-tables (:db sys))
                #{}))
-      (let [output (-> (with-out-str (sut/migrate (:ragtime sys)))
-                       str/split-lines)]
-        (doseq [o (take 3 output)]
+
+      (log/with-test-logger
+        (sut/migrate (:ragtime sys))
+        (doseq [o (map :msg (take 3 @log/*test-logger-entries*))]
           (t/is (re-matches #"^Applying v_\d{17}_migration_\d+$" o))))
 
       (t/is (= (find-test-tables (:db sys))
-               #{"TEST_0" "TEST_1" "TEST_2"}))))
+               #{"TEST_0" "TEST_1" "TEST_2"})))))
 
+(t/deftest rollback-test
   (t/testing "rollback"
     (t/testing "with n option"
       (c/with-system [sys test-conf]
@@ -70,13 +90,25 @@
         (t/is (= (find-test-tables (:db sys))
                  #{"TEST_0" "TEST_1" "TEST_2"}))
 
-        (let [output (-> (with-out-str (sut/rollback (:ragtime sys) {:n 2}))
-                         str/split-lines)]
-          (doseq [o (take 2 output)]
+        (log/with-test-logger
+          (sut/rollback (:ragtime sys) {:n 2})
+          (doseq [o (map :msg (take 2 @log/*test-logger-entries*))]
             (t/is (re-matches #"^Rolling back v_\d{17}_migration_\d+$" o))))
 
         (t/is (= (find-test-tables (:db sys))
-                 #{"TEST_0"}))))
+                 #{"TEST_0"})))
+
+      (c/with-system [sys test-conf]
+        (sut/migrate (:ragtime sys))
+        (t/is (= (find-test-tables (:db sys))
+                 #{"TEST_0" "TEST_1" "TEST_2"}))
+
+        (log/with-test-logger
+          (sut/rollback (:ragtime sys) {:n nil})
+          (log/logged? #"^Rolling back v_\d{17}_migration_\d+$"))
+
+        (t/is (= (find-test-tables (:db sys))
+                 #{"TEST_0" "TEST_1"}))))
 
 
     (t/testing "with id option"
@@ -87,11 +119,11 @@
 
         (let [id (-> (jdbc/query (:db sys) "select * from ragtime_migrations order by created_at")
                      second
-                     :id)
-              output (-> (with-out-str (sut/rollback (:ragtime sys) {:id id}))
-                         str/split-lines)]
-          (doseq [o (take 1 output)]
-            (t/is (re-matches #"^Rolling back v_\d{17}_migration_\d+$" o))))
+                     :id)]
+          (log/with-test-logger
+            (sut/rollback (:ragtime sys) {:id id})
+            (doseq [o (map :msg (take 1 @log/*test-logger-entries*))]
+              (t/is (re-matches #"^Rolling back v_\d{17}_migration_\d+$" o))))
 
-        (t/is (= (find-test-tables (:db sys))
-                 #{"TEST_0" "TEST_1"}))))))
+          (t/is (= (find-test-tables (:db sys))
+                   #{"TEST_0" "TEST_1"})))))))
