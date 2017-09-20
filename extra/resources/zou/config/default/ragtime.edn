@@ -1,0 +1,7 @@
+{:ragtime
+ {:zou/constructor zou.migrator.ragtime/new-ragtime
+  :zou/dependencies {:db :hikari-cp}
+  :migrations-path "migrations"
+  :style :sql ;; `:sql` or `:edn`
+  :strategy #resolve ragtime.strategy/raise-error
+  :reporter #resolve ragtime.reporter/print}}
